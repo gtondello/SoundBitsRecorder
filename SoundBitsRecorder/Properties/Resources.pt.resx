@@ -1,0 +1,238 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="About" xml:space="preserve">
+    <value>Sobre SoundBits Recorder</value>
+  </data>
+  <data name="Author" xml:space="preserve">
+    <value>Autor:</value>
+  </data>
+  <data name="BitsPerSample" xml:space="preserve">
+    <value>bits por amostra</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="BuildDate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>BuildDate.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="built" xml:space="preserve">
+    <value>gerada</value>
+  </data>
+  <data name="ChangeNextTime" xml:space="preserve">
+    <value>Esta mudança terá efeito da próxima vez que você abrir esta aplicação.</value>
+  </data>
+  <data name="Company" xml:space="preserve">
+    <value>Empresa:</value>
+  </data>
+  <data name="Confirmation" xml:space="preserve">
+    <value>Confirmação</value>
+  </data>
+  <data name="ConfirmInProgress" xml:space="preserve">
+    <value>Gravação em andamento. Tem certeza que você quer sair? O áudio gravado até o momento será salvo.</value>
+  </data>
+  <data name="Default" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="Device" xml:space="preserve">
+    <value>Dispositivo:</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Erro</value>
+  </data>
+  <data name="ErrorAlreadyStarted" xml:space="preserve">
+    <value>A gravação já foi iniciada.</value>
+  </data>
+  <data name="ErrorNoDevices" xml:space="preserve">
+    <value>Pelo menos um dispositivo de entrada ou saída precisa ser selectionado.</value>
+  </data>
+  <data name="ErrorRecording" xml:space="preserve">
+    <value>Ocorreu um erro durante a gravação.</value>
+  </data>
+  <data name="ErrorStartRecording" xml:space="preserve">
+    <value>Ocorreu um erro ao tentar começar a gravar.</value>
+  </data>
+  <data name="Information" xml:space="preserve">
+    <value>Informação</value>
+  </data>
+  <data name="Initializing" xml:space="preserve">
+    <value>Inicializando...</value>
+  </data>
+  <data name="Licenses" xml:space="preserve">
+    <value>Licenças</value>
+  </data>
+  <data name="MenuAbout" xml:space="preserve">
+    <value>_Sobre SoundBits Recorder</value>
+  </data>
+  <data name="MenuExit" xml:space="preserve">
+    <value>_Sair</value>
+  </data>
+  <data name="MenuFile" xml:space="preserve">
+    <value>_Arquivo</value>
+  </data>
+  <data name="MenuLanguage" xml:space="preserve">
+    <value>_Idioma</value>
+  </data>
+  <data name="MenuOutputFolder" xml:space="preserve">
+    <value>_Pasta para Gravação...</value>
+  </data>
+  <data name="MenuSettings" xml:space="preserve">
+    <value>_Opções</value>
+  </data>
+  <data name="MenuStartRecording" xml:space="preserve">
+    <value>_Começar a Gravar</value>
+  </data>
+  <data name="MenuStopRecording" xml:space="preserve">
+    <value>_Parar de Gravar</value>
+  </data>
+  <data name="OpenFolder" xml:space="preserve">
+    <value>Abrir Pasta...</value>
+  </data>
+  <data name="RecordFromInput" xml:space="preserve">
+    <value>Gravar som da entrada</value>
+  </data>
+  <data name="RecordFromOutput" xml:space="preserve">
+    <value>Gravar som da saída</value>
+  </data>
+  <data name="Recording" xml:space="preserve">
+    <value>Gravando...</value>
+  </data>
+  <data name="RecordingStopped" xml:space="preserve">
+    <value>A gravação foi interrompida.</value>
+  </data>
+  <data name="SaveTo" xml:space="preserve">
+    <value>Gravar para:</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Salvando...</value>
+  </data>
+  <data name="StartRecording" xml:space="preserve">
+    <value>Começar a Gravar</value>
+  </data>
+  <data name="StopRecording" xml:space="preserve">
+    <value>Parar de Gravar</value>
+  </data>
+  <data name="UnsupportedSoundEncoding" xml:space="preserve">
+    <value>Codificação de som não suportada</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Versão:</value>
+  </data>
+  <data name="Website" xml:space="preserve">
+    <value>Website:</value>
+  </data>
+</root>

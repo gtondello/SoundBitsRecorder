@@ -1,0 +1,38 @@
+﻿SoundBits Recorder
+------------------
+Autor: Gustavo Fortes Tondello
+Empresa: GamefulBits
+Website: https://gamefulbits.com/
+
+Copyright (c) 2021 Gustavo Fortes Tondello
+
+Licença:
+--------
+Uma autorização é aqui fornecida, sem custo, para qualquer pessoa que obter uma cópia deste programa, para utilizá-lo para objetivos não comerciais somente (por exemplo, usos pessoais, educacionais ou sem fins de lucro).
+
+Se você necessitar utilizar este programa para objetivos comerciais, você precisa adquirir uma licença profissional. Por favor, verifique gamefulbits.com para opções.
+
+Este programa é fornecido "no estado em que se encontra", sem garantia de qualquer tipo, expressa ou implícita, incluindo, mas não se limitando às garantias de comercialização, adequação a um propósito específico e não violação. Em nenhum caso os autores ou detentores de direitos autorais serão responsáveis por qualquer reclamação, danos ou outra responsabilidade, seja em uma ação de contrato, ato ilícito ou de outra forma, decorrente de, por causa de, ou em conexão com o programa, seu uso, ou outras negociações relativas ao programa.
+
+Licenças de terceiros:
+---------------------
+O único do gravador de som foi criado por Kiranshastry em www.flaticon.com.
+
+A seguinte biblioteca é usada sob a Microsoft Software License:
+- Windows API Code Pack for Microsoft .NET Framework (https://github.com/contre/Windows-API-Code-Pack-1.1)
+
+A seguinte biblioteca é usada sob uma licença LGPL:
+- LAME (https://lame.sourceforge.io/)
+
+As seguintes bibliotecas são usadas sob uma licença MIT:
+- NAudio (https://github.com/naudio/NAudio) - Copyright 2020 Mark Heath
+- NAUdio.Lame (https://github.com/Corey-M/NAudio.Lame) - Copyright 2013-2019 Corey Murtagh
+- AutoUpdater.NET (https://github.com/ravibpatel/AutoUpdater.NET) - Copyright 2012-2020 RBSoft
+
+A licença MIT:
+----------------
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
