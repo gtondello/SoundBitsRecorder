@@ -8,5 +8,17 @@
     <Setting Name="OutputFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="Basic_RecordInput" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Basic_RecordOutput" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Basic_InputID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Default</Value>
+    </Setting>
+    <Setting Name="Basic_OutputID" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Default</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -1,5 +1,6 @@
 ﻿using AutoUpdaterDotNET;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using NAudio.CoreAudioApi;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -19,31 +20,58 @@ namespace SoundBitsRecorder
         SoundRecorder _recorder;
         System.Timers.Timer _timer;
         bool _isRecording;
+        bool _isStopping;
 
         public MainWindow()
         {
-            var culture = new System.Globalization.CultureInfo(Properties.Settings.Default.Language);
+            System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo(Properties.Settings.Default.Language);
             Thread.CurrentThread.CurrentUICulture = culture;
             Thread.CurrentThread.CurrentCulture = culture;
             InitializeComponent();
             Mouse.OverrideCursor = Cursors.Wait;
-            _isRecording = false;
-            _recorder = new SoundRecorder();
             menuItemEnglish.IsChecked = Properties.Settings.Default.Language == "en";
             menuItemPortugues.IsChecked = Properties.Settings.Default.Language == "pt";
-            comboBoxInput.Items.Add(SoundBitsRecorder.Properties.Resources.Default + " - " + _recorder.DefaultCaptureDevice.FriendlyName);
-            foreach (var device in _recorder.CaptureDevices)
+            buttonRecord.Content = Properties.Resources.StartRecording;
+            _isRecording = false;
+            _recorder = new SoundRecorder();
+            InitializeDevices();
+            InitializeDirectory();
+            Mouse.OverrideCursor = null;
+            AutoUpdater.Start("http://apps.gamefulbits.com/updates/SoundBitsRecorder.xml");
+        }
+
+        private void InitializeDevices()
+        {
+            checkBoxInput.IsChecked = Properties.Settings.Default.Basic_RecordInput;
+            comboBoxInput.Items.Add(Properties.Resources.Default + " - " + _recorder.DefaultCaptureDevice.FriendlyName);
+            comboBoxInput.SelectedIndex = 0;
+            foreach (MMDevice device in _recorder.CaptureDevices)
             {
                 comboBoxInput.Items.Add(device.FriendlyName);
+                if (device.ID == Properties.Settings.Default.Basic_InputID)
+                {
+                    comboBoxInput.SelectedIndex = comboBoxInput.Items.Count - 1;
+                }
             }
-            comboBoxInput.SelectedIndex = 0;
-            comboBoxOutput.Items.Add(SoundBitsRecorder.Properties.Resources.Default + " - " + _recorder.DefaultRenderDevice.FriendlyName);
-            foreach (var device in _recorder.RenderDevices)
+            checkBoxInput_Checked(checkBoxInput, null);
+
+            checkBoxOutput.IsChecked = Properties.Settings.Default.Basic_RecordOutput;
+            comboBoxOutput.Items.Add(Properties.Resources.Default + " - " + _recorder.DefaultRenderDevice.FriendlyName);
+            comboBoxOutput.SelectedIndex = 0;
+            foreach (MMDevice device in _recorder.RenderDevices)
             {
                 comboBoxOutput.Items.Add(device.FriendlyName);
+                if (device.ID == Properties.Settings.Default.Basic_OutputID)
+                {
+                    comboBoxOutput.SelectedIndex = comboBoxOutput.Items.Count - 1;
+                }
             }
-            comboBoxOutput.SelectedIndex = 0;
-            var directory = Properties.Settings.Default.OutputFolder == "" ?
+            checkBoxOutput_Checked(checkBoxOutput, null);
+        }
+
+        private void InitializeDirectory()
+        {
+            string directory = Properties.Settings.Default.OutputFolder == "" ?
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "SoundBits") :
                 Properties.Settings.Default.OutputFolder;
             if (!Directory.Exists(directory))
@@ -51,17 +79,13 @@ namespace SoundBitsRecorder
                 Directory.CreateDirectory(directory);
             }
             textBoxFilename.Text = directory;
-            buttonRecord.Content = SoundBitsRecorder.Properties.Resources.StartRecording;
-            buttonRecord.IsEnabled = true;
-            Mouse.OverrideCursor = null;
-            AutoUpdater.Start("http://apps.gamefulbits.com/updates/SoundBitsRecorder.xml");
         }
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             if (_isRecording)
             {
-                MessageBoxResult result = MessageBox.Show(SoundBitsRecorder.Properties.Resources.ConfirmInProgress, SoundBitsRecorder.Properties.Resources.Confirmation, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                MessageBoxResult result = MessageBox.Show(Properties.Resources.ConfirmInProgress, Properties.Resources.Confirmation, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
                 switch (result)
                 {
                     case MessageBoxResult.Yes:
@@ -75,6 +99,10 @@ namespace SoundBitsRecorder
             if (!e.Cancel)
             {
                 Properties.Settings.Default.OutputFolder = textBoxFilename.Text.Trim();
+                Properties.Settings.Default.Basic_RecordInput = checkBoxInput.IsChecked.GetValueOrDefault(false);
+                Properties.Settings.Default.Basic_RecordOutput = checkBoxOutput.IsChecked.GetValueOrDefault(false);
+                Properties.Settings.Default.Basic_InputID = comboBoxInput.SelectedIndex == 0 ? "Default" : _recorder.CaptureDevices[comboBoxInput.SelectedIndex - 1].ID;
+                Properties.Settings.Default.Basic_OutputID = comboBoxOutput.SelectedIndex == 0 ? "Default" : _recorder.RenderDevices[comboBoxOutput.SelectedIndex - 1].ID;
                 Properties.Settings.Default.Save();
             }
         }
@@ -112,7 +140,7 @@ namespace SoundBitsRecorder
         }
         private void buttonFilename_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new CommonOpenFileDialog
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog
             {
                 InitialDirectory = textBoxFilename.Text.Trim(),
                 IsFolderPicker = true
@@ -149,14 +177,14 @@ namespace SoundBitsRecorder
             comboBoxOutput.IsEnabled = false;
             textBoxFilename.IsEnabled = false;
             menuItemOutputFolder.IsEnabled = false;
-            labelRecording.Content = SoundBitsRecorder.Properties.Resources.Recording;
+            labelRecording.Content = Properties.Resources.Recording;
             labelRecording.Visibility = Visibility.Visible;
             labelTime.Content = "00:00";
             labelTime.Visibility = Visibility.Visible;
 
             try
             {
-                var directory = textBoxFilename.Text.Trim();
+                string directory = textBoxFilename.Text.Trim();
                 if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
@@ -171,8 +199,9 @@ namespace SoundBitsRecorder
                 {
                     renderDeviceIndex = comboBoxOutput.SelectedIndex - 1;
                 }
-                buttonRecord.Content = SoundBitsRecorder.Properties.Resources.StopRecording;
-                menuItemRecord.Header = SoundBitsRecorder.Properties.Resources.MenuStopRecording;
+                buttonRecord.Content = Properties.Resources.StopRecording;
+                menuItemRecord.Header = Properties.Resources.MenuStopRecording;
+                _isStopping = false;
                 _isRecording = true;
                 _recorder.StartRecording(captureDeviceIndex, renderDeviceIndex, directory);
                 _timer = new System.Timers.Timer(1000);
@@ -184,7 +213,7 @@ namespace SoundBitsRecorder
             catch (Exception e)
             {
                 StopRecording();
-                ShowErrorMessage(SoundBitsRecorder.Properties.Resources.ErrorStartRecording + "\n\n" + e.Message);
+                ShowErrorMessage(Properties.Resources.ErrorStartRecording + "\n\n" + e.Message);
             }
         }
 
@@ -199,16 +228,17 @@ namespace SoundBitsRecorder
                     _timer.Dispose();
                     _timer = null;
                 }
-                labelRecording.Content = SoundBitsRecorder.Properties.Resources.Saving;
+                labelRecording.Content = Properties.Resources.Saving;
                 labelTime.Visibility = Visibility.Hidden;
                 if (_recorder.IsRecording)
                 {
                     _recorder.StopRecording();
                 }
                 _isRecording = false;
+                _isStopping = false;
                 labelRecording.Visibility = Visibility.Hidden;
-                buttonRecord.Content = SoundBitsRecorder.Properties.Resources.StartRecording;
-                menuItemRecord.Header = SoundBitsRecorder.Properties.Resources.MenuStartRecording;
+                buttonRecord.Content = Properties.Resources.StartRecording;
+                menuItemRecord.Header = Properties.Resources.MenuStartRecording;
                 checkBoxInput.IsEnabled = true;
                 comboBoxInput.IsEnabled = checkBoxInput.IsChecked.GetValueOrDefault(false);
                 checkBoxOutput.IsEnabled = true;
@@ -226,9 +256,18 @@ namespace SoundBitsRecorder
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (_isRecording)
+            if (_recorder.Error != null && !_isStopping)
             {
-                var s = "--:--";
+                Dispatcher.Invoke(() =>
+                {
+                    _isStopping = true;
+                    StopRecording();
+                    ShowErrorMessage(SoundBitsRecorder.Properties.Resources.ErrorRecording + "\n\n" + _recorder.Error + "\n\n" + SoundBitsRecorder.Properties.Resources.RecordingStopped);
+                });
+            }
+            else if (_isRecording)
+            {
+                string s = "--:--";
                 TimeSpan? recordingTime = _recorder.RecordingTime;
                 if (recordingTime.HasValue)
                 {
@@ -241,11 +280,6 @@ namespace SoundBitsRecorder
                 {
                     labelTime.Content = s;
                 });
-            }
-            else if (_recorder.Error != null)
-            {
-                StopRecording();
-                ShowErrorMessage(SoundBitsRecorder.Properties.Resources.ErrorRecording + "\n\n" + _recorder.Error + "\n\n" + SoundBitsRecorder.Properties.Resources.RecordingStopped);
             }
         }
 
@@ -279,8 +313,10 @@ namespace SoundBitsRecorder
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.Owner = this;
+            AboutWindow aboutWindow = new AboutWindow
+            {
+                Owner = this
+            };
             aboutWindow.ShowDialog();
         }
 
