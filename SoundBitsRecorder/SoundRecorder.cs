@@ -1,5 +1,6 @@
 ﻿using NAudio.CoreAudioApi;
 using NAudio.Lame;
+using NAudio.MediaFoundation;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -8,24 +9,20 @@ using System.Timers;
 
 namespace SoundBitsRecorder
 {
-    class SoundRecorder
+    public class SoundRecorder
     {
-        List<MMDevice> _captureDevices;
-        List<MMDevice> _renderDevices;
-        MMDevice _defaultCaptureDevice;
-        MMDevice _defaultRenderDevice;
-        WasapiOut _output;
-        WasapiCapture _capture;
-        WasapiLoopbackCapture _loopback;
-        BufferedWaveProvider _bufferCapture;
-        BufferedWaveProvider _bufferLoopback;
-        WaveFormat _format;
-        LameMP3FileWriter _writer;
-        Timer _timer;
-        DateTime _started;
-        bool _isRecording;
-        string _error;
-        readonly object _lockObject = new object();
+        private List<MMDevice> _captureDevices;
+        private List<MMDevice> _renderDevices;
+        private MMDevice _defaultCaptureDevice;
+        private MMDevice _defaultRenderDevice;
+        private List<RecordingDeviceModel> _recordingModels;
+        private WaveFormat _format;
+        private LameMP3FileWriter _writer;
+        private Timer _timer;
+        private DateTime _started;
+        private bool _isRecording;
+        private string _error;
+        private readonly object _lockObject = new object();
 
         public List<MMDevice> CaptureDevices => _captureDevices;
         public List<MMDevice> RenderDevices => _renderDevices;
@@ -37,14 +34,7 @@ namespace SoundBitsRecorder
         {
             get
             {
-                if (_isRecording)
-                {
-                    return DateTime.Now - _started;
-                }
-                else
-                {
-                    return null;
-                }
+                return _isRecording ? (TimeSpan?)(DateTime.Now - _started) : null;
             }
         }
 
@@ -53,8 +43,9 @@ namespace SoundBitsRecorder
             _isRecording = false;
             _captureDevices = new List<MMDevice>();
             _renderDevices = new List<MMDevice>();
-            var enumerator = new MMDeviceEnumerator();
-            foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active))
+            _recordingModels = new List<RecordingDeviceModel>();
+            MMDeviceEnumerator enumerator = new MMDeviceEnumerator();
+            foreach (MMDevice device in enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active))
             {
                 try
                 {
@@ -69,61 +60,52 @@ namespace SoundBitsRecorder
             }
             _defaultCaptureDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Capture, Role.Console);
             _defaultRenderDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Console);
+            MediaFoundationApi.Startup();
         }
 
-        public void StartRecording(Nullable<int> captureDeviceIndex, Nullable<int> renderDeviceIndex, string outputDirectory)
+        public void StartRecording(int? captureDeviceIndex, int? renderDeviceIndex, string outputDirectory)
         {
             if (_isRecording)
             {
-                throw new ApplicationException(SoundBitsRecorder.Properties.Resources.ErrorAlreadyStarted);
+                throw new ApplicationException(Properties.Resources.ErrorAlreadyStarted);
             }
             if (!renderDeviceIndex.HasValue && !captureDeviceIndex.HasValue)
             {
-                throw new ArgumentException(SoundBitsRecorder.Properties.Resources.ErrorNoDevices);
+                throw new ArgumentException(Properties.Resources.ErrorNoDevices);
             }
 
             try
             {
+                _recordingModels.Clear();
                 if (renderDeviceIndex.HasValue)
                 {
-                    var renderDevice = renderDeviceIndex.Value == -1 ? _defaultRenderDevice : _renderDevices[renderDeviceIndex.Value];
-                    _output = new WasapiOut(renderDevice, AudioClientShareMode.Shared, true, 200);
-                    _output.Init(new SilenceProvider(_output.OutputWaveFormat));
-                    _loopback = new WasapiLoopbackCapture(renderDevice);
-                    _bufferLoopback = CreateBuffer(_loopback);
+                    MMDevice renderDevice = renderDeviceIndex.Value == -1 ? _defaultRenderDevice : _renderDevices[renderDeviceIndex.Value];
+                    RecordingDeviceModel recordingModel = new RecordingDeviceModel(renderDevice);
+                    _recordingModels.Add(recordingModel);
                 }
                 if (captureDeviceIndex.HasValue)
                 {
-                    var captureDevice = captureDeviceIndex.Value == -1 ? _defaultCaptureDevice : _captureDevices[captureDeviceIndex.Value];
-                    _capture = new WasapiCapture(captureDevice);
-                    if (_loopback != null)
-                    {
-                        _capture.WaveFormat = _loopback.WaveFormat;
-                    }
-                    _bufferCapture = CreateBuffer(_capture);
+                    MMDevice captureDevice = captureDeviceIndex.Value == -1 ? _defaultCaptureDevice : _captureDevices[captureDeviceIndex.Value];
+                    RecordingDeviceModel recordingModel = new RecordingDeviceModel(captureDevice, _recordingModels.Count > 0 ? _recordingModels[0].WaveFormat : null);
+                    _recordingModels.Add(recordingModel);
                 }
-                _format = _loopback != null ? _loopback.WaveFormat : _capture.WaveFormat;
+                _format = _recordingModels[0].WaveFormat;
                 if (_format.BitsPerSample != 8 && _format.BitsPerSample != 16 && _format.BitsPerSample != 32)
                 {
-                    throw new FormatException(SoundBitsRecorder.Properties.Resources.UnsupportedSoundEncoding + $": {_format.BitsPerSample} " + SoundBitsRecorder.Properties.Resources.BitsPerSample);
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_format.BitsPerSample} " + Properties.Resources.BitsPerSample);
                 }
 
-                var fileName = Path.Combine(outputDirectory, DateTime.Now.ToString("yyyyMMddHHmmss") + ".mp3");
-                _writer = new LameMP3FileWriter(fileName, _loopback != null ? _loopback.WaveFormat : _capture.WaveFormat, 160);
+                string fileName = Path.Combine(outputDirectory, DateTime.Now.ToString("yyyyMMddHHmmss") + ".mp3");
+                _writer = new LameMP3FileWriter(fileName, _format, 160);
 
                 _timer = new Timer(100);
                 _timer.Elapsed += Timer_Elapsed;
                 _timer.AutoReset = true;
                 _timer.Enabled = true;
 
-                if (_loopback != null)
+                foreach(RecordingDeviceModel recordingModel in _recordingModels)
                 {
-                    _output.Play();
-                    _loopback.StartRecording();
-                }
-                if (_capture != null)
-                {
-                    _capture.StartRecording();
+                    recordingModel.StartRecording();
                 }
                 _started = DateTime.Now;
                 _error = null;
@@ -148,17 +130,10 @@ namespace SoundBitsRecorder
                     _timer.Dispose();
                 }
 
-                if (_capture != null)
+                foreach (RecordingDeviceModel recordingModel in _recordingModels)
                 {
-                    _capture.StopRecording();
-                    _capture.Dispose();
-                }
-                if (_loopback != null)
-                {
-                    _loopback.StopRecording();
-                    _output.Stop();
-                    _loopback.Dispose();
-                    _output.Dispose();
+                    recordingModel.StopRecording();
+                    recordingModel.Dispose();
                 }
 
                 if (_writer != null)
@@ -169,41 +144,12 @@ namespace SoundBitsRecorder
             }
             finally
             {
+                _recordingModels.Clear();
                 _timer = null;
-                _loopback = null;
-                _capture = null;
-                _output = null;
-                _bufferCapture = null;
-                _bufferLoopback = null;
                 _format = null;
                 _error = null;
                 _writer = null;
             }
-        }
-
-        private BufferedWaveProvider CreateBuffer(IWaveIn waveIn)
-        {
-            var buffer = new BufferedWaveProvider(waveIn.WaveFormat);
-            waveIn.DataAvailable += (s, a) =>
-            {
-                try
-                {
-                    if (!_isRecording)
-                    {
-                        return;
-                    }
-                    lock (_lockObject)
-                    {
-                        buffer.AddSamples(a.Buffer, 0, a.BytesRecorded);
-                    }
-                }
-                catch (Exception e)
-                {
-                    StopRecording();
-                    _error = e.Message;
-                }
-            };
-            return buffer;
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -214,16 +160,21 @@ namespace SoundBitsRecorder
             }
             try
             {
-                var n = Math.Min(
-                    _bufferLoopback != null ? _bufferLoopback.BufferedBytes : Int32.MaxValue,
-                    _bufferCapture != null ? _bufferCapture.BufferedBytes : Int32.MaxValue
-                    );
+                int n = int.MaxValue;
+                foreach (RecordingDeviceModel recordingModel in _recordingModels)
+                {
+                    if (recordingModel.Error != null)
+                    {
+                        throw new Exception(recordingModel.Error);
+                    }
+                    n = Math.Min(n, recordingModel.BufferedBytes);
+                }
                 if (n > 0)
                 {
-                    byte[] bytesRecord = AddSamples(n);
+                    byte[] bytesRecorded = AddSamples(n);
                     lock (_lockObject)
                     {
-                        _writer.Write(bytesRecord, 0, n);
+                        _writer.Write(bytesRecorded, 0, n);
                     }
                 }
             }
@@ -236,64 +187,40 @@ namespace SoundBitsRecorder
 
         private byte[] AddSamples(int n)
         {
-            var bytesRecord = new byte[n];
-            var waveBufferRecord = new WaveBuffer(bytesRecord);
+            var bytesRecorded = new byte[n];
+            var bytesCaptured = new byte[n];
+            var waveBufferRecorded = new WaveBuffer(bytesRecorded);
+            var waveBufferCaptured = new WaveBuffer(bytesCaptured);
 
-            byte[] bytesLoopback = null;
-            WaveBuffer waveBufferLoopback = null;
-            byte[] bytesCapture = null;
-            WaveBuffer waveBufferCapture = null;
-
-            if (_bufferLoopback != null)
+            foreach (RecordingDeviceModel recordingModel in _recordingModels)
             {
-                bytesLoopback = new byte[n];
-                waveBufferLoopback = new WaveBuffer(bytesLoopback);
-                lock (_lockObject)
+                recordingModel.Read(bytesCaptured, 0, n);
+                switch (_format.BitsPerSample)
                 {
-                    _bufferLoopback.Read(bytesLoopback, 0, n);
+                    case 8:
+                        for (int i = 0; i < n; i++)
+                        {
+                            bytesRecorded[i] += bytesCaptured[i];
+                        }
+                        break;
+                    case 16:
+                        for (int i = 0; i < n / 2; i++)
+                        {
+                            waveBufferRecorded.ShortBuffer[i] += waveBufferCaptured.ShortBuffer[i];
+                        }
+                        break;
+                    case 32:
+                        for (int i = 0; i < n / 4; i++)
+                        {
+                            waveBufferRecorded.FloatBuffer[i] += waveBufferCaptured.FloatBuffer[i];
+                        }
+                        break;
+                    default:
+                        throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_format.BitsPerSample} " + Properties.Resources.BitsPerSample);
                 }
             }
-            if (_bufferCapture != null)
-            {
-                bytesCapture = new byte[n];
-                waveBufferCapture = new WaveBuffer(bytesCapture);
-                lock (_lockObject)
-                {
-                    _bufferCapture.Read(bytesCapture, 0, n);
-                }
-            }
 
-            switch (_format.BitsPerSample)
-            {
-                case 8:
-                    for (var i = 0; i < n; i++)
-                    {
-                        bytesRecord[i] = (byte)
-                            ((bytesLoopback != null ? bytesLoopback[i] : 0) +
-                            (bytesCapture != null ? bytesCapture[i] : 0));
-                    }
-                    break;
-                case 16:
-                    for (var i = 0; i < n / 2; i++)
-                    {
-                        waveBufferRecord.ShortBuffer[i] = (short)
-                            ((waveBufferLoopback != null ? waveBufferLoopback.ShortBuffer[i] : 0) +
-                            (waveBufferCapture != null ? waveBufferCapture.ShortBuffer[i] : 0));
-                    }
-                    break;
-                case 32:
-                    for (var i = 0; i < n / 4; i++)
-                    {
-                        waveBufferRecord.FloatBuffer[i] =
-                            (waveBufferLoopback != null ? waveBufferLoopback.FloatBuffer[i] : 0f) +
-                            (waveBufferCapture != null ? waveBufferCapture.FloatBuffer[i] : 0f);
-                    }
-                    break;
-                default:
-                    throw new FormatException(SoundBitsRecorder.Properties.Resources.UnsupportedSoundEncoding + $": {_format.BitsPerSample} " + SoundBitsRecorder.Properties.Resources.BitsPerSample);
-            }
-
-            return bytesRecord;
+            return bytesRecorded;
         }
     }
 }
