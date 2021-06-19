@@ -20,5 +20,8 @@
     <Setting Name="Basic_OutputID" Type="System.String" Scope="User">
       <Value Profile="(Default)">Default</Value>
     </Setting>
+    <Setting Name="Main" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Basic</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

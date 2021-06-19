@@ -27,7 +27,6 @@ namespace SoundBitsRecorder
             set
             {
                 _volume = value;
-                _device.AudioEndpointVolume.MasterVolumeLevelScalar = _volume;
             }
         }
         public bool Mute
@@ -36,7 +35,6 @@ namespace SoundBitsRecorder
             set
             {
                 _mute = value;
-                _device.AudioEndpointVolume.Mute = _mute;
             }
         }
         public WaveFormat WaveFormat => _capture?.WaveFormat;
@@ -152,8 +150,8 @@ namespace SoundBitsRecorder
         {
             StopRecording();
             _capture.StopRecording();
-            _capture.Dispose();
             _output?.Stop();
+            _capture.Dispose();
             _output?.Dispose();
             _resampler?.Dispose();
         }

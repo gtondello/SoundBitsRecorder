@@ -120,8 +120,14 @@
   <data name="About" xml:space="preserve">
     <value>About SoundBits Recorder</value>
   </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
   <data name="Author" xml:space="preserve">
     <value>Author:</value>
+  </data>
+  <data name="Basic" xml:space="preserve">
+    <value>Basic</value>
   </data>
   <data name="BitsPerSample" xml:space="preserve">
     <value>bits per sample</value>
@@ -156,6 +162,9 @@
   </data>
   <data name="ErrorAlreadyStarted" xml:space="preserve">
     <value>Recording already started.</value>
+  </data>
+  <data name="ErrorChangeWhileRecording" xml:space="preserve">
+    <value>Cannot add or remove devices while recording.</value>
   </data>
   <data name="ErrorNoDevices" xml:space="preserve">
     <value>At least an input or loopback device must be specified.</value>

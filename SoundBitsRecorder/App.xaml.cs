@@ -13,5 +13,18 @@ namespace SoundBitsRecorder
     /// </summary>
     public partial class App : Application
     {
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            if (SoundBitsRecorder.Properties.Settings.Default.Main == "Advanced")
+            {
+                AdvancedWindow window = new AdvancedWindow();
+                window.Show();
+            }
+            else
+            {
+                MainWindow window = new MainWindow();
+                window.Show();
+            }
+        }
     }
 }

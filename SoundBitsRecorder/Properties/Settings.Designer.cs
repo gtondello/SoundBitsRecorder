@@ -94,5 +94,17 @@ namespace SoundBitsRecorder.Properties {
                 this["Basic_OutputID"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Basic")]
+        public string Main {
+            get {
+                return ((string)(this["Main"]));
+            }
+            set {
+                this["Main"] = value;
+            }
+        }
     }
 }

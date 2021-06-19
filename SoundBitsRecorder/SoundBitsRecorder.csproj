@@ -101,6 +101,12 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AdvancedWindow.xaml.cs">
+      <DependentUpon>AdvancedWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DeviceControl.xaml.cs">
+      <DependentUpon>DeviceControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.pt.Designer.cs">
       <DependentUpon>Resources.pt.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -109,6 +115,14 @@
     <Compile Include="RecordingDeviceModel.cs" />
     <Compile Include="SoundRecorder.cs" />
     <Page Include="AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AdvancedWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="DeviceControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

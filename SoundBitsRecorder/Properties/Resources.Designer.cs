@@ -70,11 +70,29 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Advanced.
+        /// </summary>
+        public static string Advanced {
+            get {
+                return ResourceManager.GetString("Advanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Author:.
         /// </summary>
         public static string Author {
             get {
                 return ResourceManager.GetString("Author", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Basic.
+        /// </summary>
+        public static string Basic {
+            get {
+                return ResourceManager.GetString("Basic", resourceCulture);
             }
         }
         
@@ -88,7 +106,7 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 2021-05-30 20:32:01.54 
+        ///   Looks up a localized string similar to 2021-06-15 
         ///.
         /// </summary>
         public static string BuildDate {
@@ -175,6 +193,15 @@ namespace SoundBitsRecorder.Properties {
         public static string ErrorAlreadyStarted {
             get {
                 return ResourceManager.GetString("ErrorAlreadyStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot add or remove devices while recording..
+        /// </summary>
+        public static string ErrorChangeWhileRecording {
+            get {
+                return ResourceManager.GetString("ErrorChangeWhileRecording", resourceCulture);
             }
         }
         
