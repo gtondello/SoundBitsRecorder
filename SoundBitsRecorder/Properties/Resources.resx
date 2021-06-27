@@ -181,6 +181,9 @@
   <data name="Initializing" xml:space="preserve">
     <value>Initializing...</value>
   </data>
+  <data name="InputDevice" xml:space="preserve">
+    <value>Input Device to Record:</value>
+  </data>
   <data name="Licenses" xml:space="preserve">
     <value>Licenses</value>
   </data>
@@ -210,6 +213,9 @@
   </data>
   <data name="OpenFolder" xml:space="preserve">
     <value>Open Folder...</value>
+  </data>
+  <data name="OutputDevice" xml:space="preserve">
+    <value>Output Device to Record:</value>
   </data>
   <data name="RecordFromInput" xml:space="preserve">
     <value>Record sound from input</value>

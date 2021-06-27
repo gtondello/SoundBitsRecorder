@@ -207,6 +207,12 @@
   <ItemGroup>
     <Resource Include="updates\SoundBitsRecorder.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="mute.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="unmute.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\NAudio.Lame.2.0.0\build\NAudio.Lame.targets" Condition="Exists('..\packages\NAudio.Lame.2.0.0\build\NAudio.Lame.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

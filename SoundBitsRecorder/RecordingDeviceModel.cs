@@ -26,7 +26,7 @@ namespace SoundBitsRecorder
             get { return _volume;  }
             set
             {
-                _volume = value;
+                _volume = value > 2 ? 2.0f : value < 0 ? 0.0f : value;
             }
         }
         public bool Mute
@@ -109,12 +109,12 @@ namespace SoundBitsRecorder
                             int bytesWritten;
                             while ((bytesWritten = _resampler.Read(tempBuffer, 0, _waveFormat.AverageBytesPerSecond)) > 0)
                             {
-                                _buffer.AddSamples(tempBuffer, 0, bytesWritten);
+                                _buffer.AddSamples(AdjustVolume(tempBuffer, bytesWritten), 0, bytesWritten);
                             }
                         }
                         else
                         {
-                            _buffer.AddSamples(args.Buffer, 0, args.BytesRecorded);
+                            _buffer.AddSamples(AdjustVolume(args.Buffer, args.BytesRecorded), 0, args.BytesRecorded);
                         }
                         //DataAvailable?.Invoke(sender, args);
                     }
@@ -158,7 +158,11 @@ namespace SoundBitsRecorder
 
         private float CalculateLevelMeter(WaveInEventArgs args, WaveFormat waveFormat)
         {
-            float max = 0;
+            if (_mute || _volume <= 0)
+            {
+                return 0.0f;
+            }
+            float max = 0.0f;
             WaveBuffer buffer = new WaveBuffer(args.Buffer);
             switch (waveFormat.BitsPerSample)
             {
@@ -191,7 +195,46 @@ namespace SoundBitsRecorder
                 default:
                     break;
             }
-            return max;
+            return max * _volume;
+        }
+
+        private byte[] AdjustVolume(byte[] buffer, int count)
+        {
+            if (_volume == 1.0f)
+            {
+                return buffer;
+            }
+            byte[] outBuffer = new byte[count];
+            if (_mute || _volume <= 0)
+            {
+                return outBuffer;
+            }
+            var waveBuffer = new WaveBuffer(buffer);
+            var outWaveBuffer = new WaveBuffer(outBuffer);
+            switch (_waveFormat.BitsPerSample)
+            {
+                case 8:
+                    for (int i = 0; i < count; i++)
+                    {
+                        outBuffer[i] += (byte) (buffer[i] * _volume);
+                    }
+                    break;
+                case 16:
+                    for (int i = 0; i < count / 2; i++)
+                    {
+                        outWaveBuffer.ShortBuffer[i] += (short) (waveBuffer.ShortBuffer[i] * _volume);
+                    }
+                    break;
+                case 32:
+                    for (int i = 0; i < count / 4; i++)
+                    {
+                        outWaveBuffer.FloatBuffer[i] += waveBuffer.FloatBuffer[i] * _volume;
+                    }
+                    break;
+                default:
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_waveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
+            }
+            return outBuffer;
         }
     }
 

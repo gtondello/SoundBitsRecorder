@@ -106,5 +106,29 @@ namespace SoundBitsRecorder.Properties {
                 this["Main"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public float Advanced_InputVolume {
+            get {
+                return ((float)(this["Advanced_InputVolume"]));
+            }
+            set {
+                this["Advanced_InputVolume"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public float Advanced_OutputVolume {
+            get {
+                return ((float)(this["Advanced_OutputVolume"]));
+            }
+            set {
+                this["Advanced_OutputVolume"] = value;
+            }
+        }
     }
 }

@@ -5,17 +5,31 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SoundBitsRecorder"
              mc:Ignorable="d" 
-             d:DesignHeight="40" d:DesignWidth="480">
+             d:DesignHeight="100" d:DesignWidth="480">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <Grid Margin="0,5">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <Label x:Name="label" Content=""></Label>
-        <ProgressBar x:Name="progressBar" Height="15" VerticalAlignment="Top" Margin="0,0,0,0" Grid.Row="1" Maximum="60" RenderTransformOrigin="0.5,0.5">
+        <ProgressBar x:Name="progressBar" Height="15" VerticalAlignment="Top" Margin="0,0,0,0" Grid.Row="1" Grid.ColumnSpan="3" Maximum="60" RenderTransformOrigin="0.5,0.5">
             <ProgressBar.Background>
                 <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
                     <LinearGradientBrush.GradientStops>
@@ -35,5 +49,10 @@
                 <RotateTransform Angle="180"/>
             </ProgressBar.RenderTransform>
         </ProgressBar>
+        <Slider x:Name="volumeControl" Margin="0,0,0,0" Grid.Row="2" Maximum="150" Value="100" TickPlacement="BottomRight" TickFrequency="100" ValueChanged="volumeControl_ValueChanged" />
+        <Label x:Name="volumeLabel" Width="40" Grid.Row="2" Grid.Column="1" Content="100%" />
+        <Button Style="{StaticResource ImageButtonStyle}" Click="MuteButton_Click" Height="16" Width="16" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <Image x:Name="muteButton"  Source="mute.png" />
+        </Button>
     </Grid>
 </UserControl>

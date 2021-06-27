@@ -106,7 +106,7 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 2021-06-15 
+        ///   Looks up a localized string similar to 2021-06-27 
         ///.
         /// </summary>
         public static string BuildDate {
@@ -251,6 +251,15 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Input Device to Record:.
+        /// </summary>
+        public static string InputDevice {
+            get {
+                return ResourceManager.GetString("InputDevice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Licenses.
         /// </summary>
         public static string Licenses {
@@ -337,6 +346,15 @@ namespace SoundBitsRecorder.Properties {
         public static string OpenFolder {
             get {
                 return ResourceManager.GetString("OpenFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Output Device to Record:.
+        /// </summary>
+        public static string OutputDevice {
+            get {
+                return ResourceManager.GetString("OutputDevice", resourceCulture);
             }
         }
         

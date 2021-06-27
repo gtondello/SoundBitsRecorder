@@ -1,5 +1,6 @@
 ﻿using AutoUpdaterDotNET;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using NAudio.CoreAudioApi;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -20,6 +21,7 @@ namespace SoundBitsRecorder
         System.Timers.Timer _timer;
         bool _isRecording;
         bool _isStopping;
+        bool _initialized;
 
         public AdvancedWindow()
         {
@@ -43,10 +45,32 @@ namespace SoundBitsRecorder
 
         private void InitializeDevices()
         {
-            RecordingDeviceModel captureModel = _recorder.AddDevice(_recorder.DefaultCaptureDevice);
-            RecordingDeviceModel renderModel = _recorder.AddDevice(_recorder.DefaultRenderDevice);
-            panelDevices.Children.Add(new DeviceControl(captureModel));
-            panelDevices.Children.Add(new DeviceControl(renderModel));
+            _initialized = false;
+
+            comboBoxInput.Items.Add(Properties.Resources.Default + " - " + _recorder.DefaultCaptureDevice.FriendlyName);
+            comboBoxInput.SelectedIndex = 0;
+            foreach (MMDevice device in _recorder.CaptureDevices)
+            {
+                comboBoxInput.Items.Add(device.FriendlyName);
+                if (device.ID == Properties.Settings.Default.Basic_InputID)
+                {
+                    comboBoxInput.SelectedIndex = comboBoxInput.Items.Count - 1;
+                }
+            }
+
+            comboBoxOutput.Items.Add(Properties.Resources.Default + " - " + _recorder.DefaultRenderDevice.FriendlyName);
+            comboBoxOutput.SelectedIndex = 0;
+            foreach (MMDevice device in _recorder.RenderDevices)
+            {
+                comboBoxOutput.Items.Add(device.FriendlyName);
+                if (device.ID == Properties.Settings.Default.Basic_OutputID)
+                {
+                    comboBoxOutput.SelectedIndex = comboBoxOutput.Items.Count - 1;
+                }
+            }
+
+            _initialized = true;
+            comboBox_SelectionChanged(this, null);
         }
 
         private void InitializeDirectory()
@@ -59,6 +83,46 @@ namespace SoundBitsRecorder
                 Directory.CreateDirectory(directory);
             }
             textBoxFilename.Text = directory;
+        }
+
+        private void comboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (!_initialized) return;
+
+            float startInputVolume = Properties.Settings.Default.Advanced_InputVolume;
+            float startOutputVolume = Properties.Settings.Default.Advanced_OutputVolume;
+            foreach (DeviceControl control in panelInputDevice.Children)
+            {
+                startInputVolume = control.Model.Volume;
+            }
+            foreach (DeviceControl control in panelOutputDevice.Children)
+            {
+                startOutputVolume = control.Model.Volume;
+            }
+
+            RemoveAllDevices();
+
+            int renderDeviceIndex = comboBoxOutput.SelectedIndex - 1;
+            int captureDeviceIndex = comboBoxInput.SelectedIndex - 1;
+            RecordingDeviceModel renderModel = _recorder.AddDevice(renderDeviceIndex == -1 ? _recorder.DefaultRenderDevice : _recorder.RenderDevices[renderDeviceIndex]);
+            RecordingDeviceModel captureModel = _recorder.AddDevice(captureDeviceIndex == -1 ? _recorder.DefaultCaptureDevice : _recorder.CaptureDevices[captureDeviceIndex]);
+            panelOutputDevice.Children.Add(new DeviceControl(renderModel, startOutputVolume));
+            panelInputDevice.Children.Add(new DeviceControl(captureModel, startInputVolume));
+        }
+
+        private void RemoveAllDevices()
+        {
+            foreach (DeviceControl control in panelInputDevice.Children)
+            {
+                control.Clear();
+            }
+            panelInputDevice.Children.Clear();
+            foreach (DeviceControl control in panelOutputDevice.Children)
+            {
+                control.Clear();
+            }
+            panelOutputDevice.Children.Clear();
+            _recorder.RemoveAllDevices();
         }
 
         private void AdvancedWindow_Closing(object sender, CancelEventArgs e)
@@ -79,17 +143,23 @@ namespace SoundBitsRecorder
             if (!e.Cancel)
             {
                 Properties.Settings.Default.OutputFolder = textBoxFilename.Text.Trim();
+                Properties.Settings.Default.Basic_InputID = comboBoxInput.SelectedIndex == 0 ? "Default" : _recorder.CaptureDevices[comboBoxInput.SelectedIndex - 1].ID;
+                Properties.Settings.Default.Basic_OutputID = comboBoxOutput.SelectedIndex == 0 ? "Default" : _recorder.RenderDevices[comboBoxOutput.SelectedIndex - 1].ID;
+                foreach (DeviceControl control in panelInputDevice.Children)
+                {
+                    Properties.Settings.Default.Advanced_InputVolume = control.Model.Volume;
+                }
+                foreach (DeviceControl control in panelOutputDevice.Children)
+                {
+                    Properties.Settings.Default.Advanced_OutputVolume = control.Model.Volume;
+                }
                 Properties.Settings.Default.Save();
             }
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
-            foreach (DeviceControl control in panelDevices.Children)
-            {
-                control.Clear();
-            }
-            _recorder.RemoveAllDevices();
+            RemoveAllDevices();
         }
 
         private void buttonFilename_Click(object sender, RoutedEventArgs e)
@@ -125,12 +195,8 @@ namespace SoundBitsRecorder
         private void StartRecording()
         {
             Mouse.OverrideCursor = Cursors.Wait;
-            /*
-            checkBoxInput.IsEnabled = false;
             comboBoxInput.IsEnabled = false;
-            checkBoxOutput.IsEnabled = false;
             comboBoxOutput.IsEnabled = false;
-            */
             textBoxFilename.IsEnabled = false;
             menuItemOutputFolder.IsEnabled = false;
             labelRecording.Content = Properties.Resources.Recording;
@@ -145,17 +211,6 @@ namespace SoundBitsRecorder
                 {
                     Directory.CreateDirectory(directory);
                 }
-                /*
-                int? captureDeviceIndex = null;
-                if (checkBoxInput.IsChecked.GetValueOrDefault(false))
-                {
-                    captureDeviceIndex = comboBoxInput.SelectedIndex - 1;
-                }
-                int? renderDeviceIndex = null;
-                if (checkBoxOutput.IsChecked.GetValueOrDefault(false))
-                {
-                    renderDeviceIndex = comboBoxOutput.SelectedIndex - 1;
-                }*/
                 buttonRecord.Content = Properties.Resources.StopRecording;
                 menuItemRecord.Header = Properties.Resources.MenuStopRecording;
                 _isStopping = false;
@@ -196,13 +251,8 @@ namespace SoundBitsRecorder
                 labelRecording.Visibility = Visibility.Hidden;
                 buttonRecord.Content = Properties.Resources.StartRecording;
                 menuItemRecord.Header = Properties.Resources.MenuStartRecording;
-                /*
-                checkBoxInput.IsEnabled = true;
-                comboBoxInput.IsEnabled = checkBoxInput.IsChecked.GetValueOrDefault(false);
-                checkBoxOutput.IsEnabled = true;
-                comboBoxOutput.IsEnabled = checkBoxOutput.IsChecked.GetValueOrDefault(false);
-                textBoxFilename.IsEnabled = true;
-                */
+                comboBoxInput.IsEnabled = true;
+                comboBoxOutput.IsEnabled = true;
                 menuItemOutputFolder.IsEnabled = true;
                 buttonRecord.IsEnabled = true;
                 menuItemRecord.IsEnabled = buttonRecord.IsEnabled;

@@ -181,6 +181,9 @@
   <data name="Initializing" xml:space="preserve">
     <value>Inicializando...</value>
   </data>
+  <data name="InputDevice" xml:space="preserve">
+    <value>Disp. Entrada para Gravar:</value>
+  </data>
   <data name="Licenses" xml:space="preserve">
     <value>Licenças</value>
   </data>
@@ -210,6 +213,9 @@
   </data>
   <data name="OpenFolder" xml:space="preserve">
     <value>Abrir Pasta...</value>
+  </data>
+  <data name="OutputDevice" xml:space="preserve">
+    <value>Disp. Saída para Gravar:</value>
   </data>
   <data name="RecordFromInput" xml:space="preserve">
     <value>Gravar som da entrada</value>

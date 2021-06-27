@@ -6,20 +6,20 @@
         xmlns:local="clr-namespace:SoundBitsRecorder"
         xmlns:p="clr-namespace:SoundBitsRecorder.Properties"
         mc:Ignorable="d"
-        Title="SoundBits Recorder" Height="400" Width="500" ResizeMode="NoResize" Closing="AdvancedWindow_Closing" Closed="Window_Closed" Icon="microphone.png" WindowStartupLocation="CenterScreen">
+        Title="SoundBits Recorder" Height="500" Width="500" ResizeMode="NoResize" Closing="AdvancedWindow_Closing" Closed="Window_Closed" Icon="microphone.png" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="21*"/>
         </Grid.ColumnDefinitions>
         <Label x:Name="labelTitle" Content="SoundBits Recorder" HorizontalAlignment="Left" Margin="35,35,0,0" VerticalAlignment="Top" FontSize="20" FontWeight="Bold" Grid.ColumnSpan="2" Height="37" Width="195"/>
-        <Label x:Name="label3" Content="{x:Static p:Resources.SaveTo}" HorizontalAlignment="Left" Margin="10,234,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
-        <TextBox x:Name="textBoxFilename" Height="23" Margin="0,237,33,0" TextWrapping="NoWrap" Text="C:\tmp\recorded.mp3" VerticalAlignment="Top" Grid.Column="1"/>
-        <Button x:Name="buttonRecord" Content="{x:Static p:Resources.Initializing}" Margin="276,307,10,0" VerticalAlignment="Top" Height="40" IsEnabled="False" Click="buttonRecord_Click" Grid.Column="1"/>
+        <Label x:Name="label3" Content="{x:Static p:Resources.SaveTo}" HorizontalAlignment="Left" Margin="10,347,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
+        <TextBox x:Name="textBoxFilename" Height="23" Margin="0,351,33,0" TextWrapping="NoWrap" Text="C:\tmp\recorded.mp3" VerticalAlignment="Top" Grid.Column="1"/>
+        <Button x:Name="buttonRecord" Content="{x:Static p:Resources.Initializing}" Margin="276,421,10,10" IsEnabled="False" Click="buttonRecord_Click" Grid.Column="1"/>
         <Label x:Name="labelTime" Content="00:00" HorizontalAlignment="Left" Margin="10,316,0,0" VerticalAlignment="Top" FontSize="16" Visibility="Hidden" Height="31" Width="48"/>
         <Label x:Name="labelRecording" Content="{x:Static p:Resources.Recording}" HorizontalAlignment="Left" Margin="10,300,0,0" VerticalAlignment="Top" Visibility="Hidden" Height="26" Width="71"/>
-        <Button x:Name="buttonFilename" Content="..." Grid.Column="1" Margin="0,237,10,0" VerticalAlignment="Top" Height="23" Width="23" Click="buttonFilename_Click" HorizontalAlignment="Right"/>
-        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0,260,0,0" VerticalAlignment="Top" Grid.Column="1" Height="16" Width="71">
+        <Button x:Name="buttonFilename" Content="..." Grid.Column="1" Margin="0,351,10,0" VerticalAlignment="Top" Height="23" Width="23" Click="buttonFilename_Click" HorizontalAlignment="Right"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0,374,0,0" VerticalAlignment="Top" Grid.Column="1" Height="16" Width="71">
             <Hyperlink Click="OpenFolder_Click">
                 <TextBlock x:Name="linkOpenFolder" Text="{x:Static p:Resources.OpenFolder}"/>
             </Hyperlink>
@@ -46,6 +46,11 @@
                 <MenuItem x:Name="menuItemAbout" Header="{x:Static p:Resources.MenuAbout}" Click="AboutMenuItem_Click"/>
             </MenuItem>
         </Menu>
-        <StackPanel x:Name="panelDevices" Height="136" Margin="10,84,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Label x:Name="label1" Content="{x:Static p:Resources.InputDevice}" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Height="26" Width="148" Grid.ColumnSpan="2"/>
+        <ComboBox x:Name="comboBoxInput" Margin="68,88,10,0" VerticalAlignment="Top" Grid.Column="1" Height="22" SelectionChanged="comboBox_SelectionChanged"/>
+        <StackPanel x:Name="panelInputDevice" Height="86" Margin="10,115,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Label x:Name="label2" Content="{x:Static p:Resources.OutputDevice}" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" Height="26" Width="148" Grid.ColumnSpan="2"/>
+        <ComboBox x:Name="comboBoxOutput" Margin="68,206,10,0" VerticalAlignment="Top" Grid.Column="1" Height="22"/>
+        <StackPanel x:Name="panelOutputDevice" Height="86" Margin="10,233,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>
