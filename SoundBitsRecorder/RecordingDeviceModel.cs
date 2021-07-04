@@ -80,12 +80,15 @@ namespace SoundBitsRecorder
                     } 
                     else
                     {
-                        // Unsupported Wave Format, so, we need to resample
-                        _resamplerBuffer = new BufferedWaveProvider(_waveFormat)
+                        // Unsupported Wave Format, so, we need to resample or convert channels
+                        if (_capture.WaveFormat.SampleRate != _waveFormat.SampleRate)
                         {
-                            ReadFully = false
-                        };
-                        _resampler = new MediaFoundationResampler(_resamplerBuffer, _waveFormat);
+                            _resamplerBuffer = new BufferedWaveProvider(_waveFormat)
+                            {
+                                ReadFully = false
+                            };
+                            _resampler = new MediaFoundationResampler(_resamplerBuffer, _waveFormat);
+                        }
                     }
                 }
                 else
@@ -94,38 +97,7 @@ namespace SoundBitsRecorder
                 }
             }
             _buffer = new BufferedWaveProvider(_waveFormat);
-            _capture.DataAvailable += (sender, args) =>
-            {
-                try
-                {
-                    float level = CalculateLevelMeter(args, _capture.WaveFormat);
-                    LevelChanged?.Invoke(sender, new LevelMeterEventArgs(level));
-                    if (_isRecording)
-                    {
-                        if (_resampler != null)
-                        {
-                            _resamplerBuffer.AddSamples(args.Buffer, 0, args.BytesRecorded);
-                            byte[] tempBuffer = new byte[_waveFormat.AverageBytesPerSecond + _waveFormat.BlockAlign];
-                            int bytesWritten;
-                            while ((bytesWritten = _resampler.Read(tempBuffer, 0, _waveFormat.AverageBytesPerSecond)) > 0)
-                            {
-                                _buffer.AddSamples(AdjustVolume(tempBuffer, bytesWritten), 0, bytesWritten);
-                            }
-                        }
-                        else
-                        {
-                            _buffer.AddSamples(AdjustVolume(args.Buffer, args.BytesRecorded), 0, args.BytesRecorded);
-                        }
-                        //DataAvailable?.Invoke(sender, args);
-                    }
-                }
-                catch (Exception e)
-                {
-                    StopRecording();
-                    Console.WriteLine(e);
-                    _error = e.Message;
-                }
-            };
+            _capture.DataAvailable += OnDataAvailable;
             _output?.Play();
             _capture.StartRecording();
         }
@@ -151,9 +123,54 @@ namespace SoundBitsRecorder
             StopRecording();
             _capture.StopRecording();
             _output?.Stop();
+            _capture.DataAvailable -= OnDataAvailable;
             _capture.Dispose();
             _output?.Dispose();
             _resampler?.Dispose();
+        }
+
+        private void OnDataAvailable(object sender, WaveInEventArgs args)
+        {
+            try
+            {
+                float level = CalculateLevelMeter(args, _capture.WaveFormat);
+                LevelChanged?.Invoke(sender, new LevelMeterEventArgs(level));
+                if (_isRecording)
+                {
+                    WaveInEventArgs updatedArgs;
+                    if (_capture.WaveFormat.Channels == 1 && _waveFormat.Channels == 2)
+                    {
+                        updatedArgs = ConvertMonoToStereo(args);
+                    } else if (_capture.WaveFormat.Channels == 2 && _waveFormat.Channels == 1)
+                    {
+                        updatedArgs = ConvertStereoToMono(args);
+                    } else
+                    {
+                        updatedArgs = args;
+                    }
+                    if (_resampler != null)
+                    {
+                        _resamplerBuffer.AddSamples(updatedArgs.Buffer, 0, updatedArgs.BytesRecorded);
+                        byte[] tempBuffer = new byte[_waveFormat.AverageBytesPerSecond + _waveFormat.BlockAlign];
+                        int bytesWritten;
+                        while ((bytesWritten = _resampler.Read(tempBuffer, 0, _waveFormat.AverageBytesPerSecond)) > 0)
+                        {
+                            _buffer.AddSamples(AdjustVolume(tempBuffer, bytesWritten), 0, bytesWritten);
+                        }
+                    }
+                    else
+                    {
+                        _buffer.AddSamples(AdjustVolume(updatedArgs.Buffer, updatedArgs.BytesRecorded), 0, updatedArgs.BytesRecorded);
+                    }
+                    //DataAvailable?.Invoke(sender, args);
+                }
+            }
+            catch (Exception e)
+            {
+                StopRecording();
+                Console.WriteLine(e);
+                _error = e.Message;
+            }
         }
 
         private float CalculateLevelMeter(WaveInEventArgs args, WaveFormat waveFormat)
@@ -198,6 +215,79 @@ namespace SoundBitsRecorder
             return max * _volume;
         }
 
+        private WaveInEventArgs ConvertMonoToStereo(WaveInEventArgs args)
+        {
+            byte[] outBuffer = new byte[args.BytesRecorded * 2];
+            WaveBuffer waveBuffer = new WaveBuffer(args.Buffer);
+            WaveBuffer outWaveBuffer = new WaveBuffer(outBuffer);
+            int outIndex = 0;
+            switch (_waveFormat.BitsPerSample)
+            {
+                case 8:
+                    for (int n = 0; n < args.BytesRecorded; n++)
+                    {
+                        outBuffer[outIndex++] = args.Buffer[n]; // left
+                        outBuffer[outIndex++] = args.Buffer[n]; // right
+                    }
+                    break;
+                case 16:
+                    for (int n = 0; n < args.BytesRecorded / 2; n++)
+                    {
+                        outWaveBuffer.ShortBuffer[outIndex++] = waveBuffer.ShortBuffer[n]; // left
+                        outWaveBuffer.ShortBuffer[outIndex++] = waveBuffer.ShortBuffer[n]; // right
+                    }
+                    break;
+                case 32:
+                    for (int n = 0; n < args.BytesRecorded / 4; n++)
+                    {
+                        outWaveBuffer.FloatBuffer[outIndex++] = waveBuffer.FloatBuffer[n]; // left
+                        outWaveBuffer.FloatBuffer[outIndex++] = waveBuffer.FloatBuffer[n]; // right
+                    }
+                    break;
+                default:
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_waveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
+            }
+            return new WaveInEventArgs(outBuffer, args.BytesRecorded * 2);
+        }
+
+        private WaveInEventArgs ConvertStereoToMono(WaveInEventArgs args)
+        {
+            byte[] outBuffer = new byte[args.BytesRecorded / 2];
+            WaveBuffer waveBuffer = new WaveBuffer(args.Buffer);
+            WaveBuffer outWaveBuffer = new WaveBuffer(outBuffer);
+            int outIndex = 0;
+            switch (_waveFormat.BitsPerSample)
+            {
+                case 8:
+                    for (int n = 0; n < args.BytesRecorded; n += 2)
+                    {
+                        byte left = args.Buffer[n];
+                        byte right = args.Buffer[n + 1];
+                        outBuffer[outIndex++] = (byte)((left / 2) + (right / 2));
+                    }
+                    break;
+                case 16:
+                    for (int n = 0; n < args.BytesRecorded / 2; n += 2)
+                    {
+                        short left = waveBuffer.ShortBuffer[n];
+                        short right = waveBuffer.ShortBuffer[n + 1];
+                        outWaveBuffer.ShortBuffer[outIndex++] = (short)((left / 2) + (right / 2));
+                    }
+                    break;
+                case 32:
+                    for (int n = 0; n < args.BytesRecorded / 4; n += 2)
+                    {
+                        float left = waveBuffer.FloatBuffer[n];
+                        float right = waveBuffer.FloatBuffer[n + 1];
+                        outWaveBuffer.FloatBuffer[outIndex++] = (left / 2.0f) + (right / 2.0f);
+                    }
+                    break;
+                default:
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_waveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
+            }
+            return new WaveInEventArgs(outBuffer, args.BytesRecorded / 2);
+        }
+
         private byte[] AdjustVolume(byte[] buffer, int count)
         {
             if (_volume == 1.0f)
@@ -209,8 +299,8 @@ namespace SoundBitsRecorder
             {
                 return outBuffer;
             }
-            var waveBuffer = new WaveBuffer(buffer);
-            var outWaveBuffer = new WaveBuffer(outBuffer);
+            WaveBuffer waveBuffer = new WaveBuffer(buffer);
+            WaveBuffer outWaveBuffer = new WaveBuffer(outBuffer);
             switch (_waveFormat.BitsPerSample)
             {
                 case 8:

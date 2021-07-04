@@ -105,7 +105,7 @@ namespace SoundBitsRecorder
             int renderDeviceIndex = comboBoxOutput.SelectedIndex - 1;
             int captureDeviceIndex = comboBoxInput.SelectedIndex - 1;
             RecordingDeviceModel renderModel = _recorder.AddDevice(renderDeviceIndex == -1 ? _recorder.DefaultRenderDevice : _recorder.RenderDevices[renderDeviceIndex]);
-            RecordingDeviceModel captureModel = _recorder.AddDevice(captureDeviceIndex == -1 ? _recorder.DefaultCaptureDevice : _recorder.CaptureDevices[captureDeviceIndex]);
+            RecordingDeviceModel captureModel = _recorder.AddDevice(captureDeviceIndex == -1 ? _recorder.DefaultCaptureDevice : _recorder.CaptureDevices[captureDeviceIndex], renderModel.WaveFormat);
             panelOutputDevice.Children.Add(new DeviceControl(renderModel, startOutputVolume));
             panelInputDevice.Children.Add(new DeviceControl(captureModel, startInputVolume));
         }
