@@ -2,9 +2,9 @@
 
 ![GamefulBits](SoundBitsRecorder/GamefulBitsLogo.png)
 
-Author: Gustavo Fortes Tondello
-Company: GamefulBits
-Website: [https://gamefulbits.com/SoundBitsRecorder](https://gamefulbits.com/SoundBitsRecorder)
+Author: Gustavo Fortes Tondello  
+Company: GamefulBits  
+Website: [https://gamefulbits.com/SoundBitsRecorder](https://gamefulbits.com/SoundBitsRecorder)  
 Source code: [https://github.com/gtondello/SoundBitsRecorder](https://github.com/gtondello/SoundBitsRecorder)
 
 Copyright 2021 Gustavo Fortes Tondello
