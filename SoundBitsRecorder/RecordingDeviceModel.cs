@@ -4,120 +4,227 @@ using System;
 
 namespace SoundBitsRecorder
 {
+    /// <summary>
+    /// This class implements sound capture for a single audio device.
+    /// A LevelChanged event is invoked as new sound data is available, even if recording is not active. This allows the UI to display a sound level indicator.
+    /// While recording is activated, wave data is stored on an internal buffer, which can be read by calling the Read method.
+    /// </summary>
+    /// <remarks>
+    /// This object also keeps track of the current status (device, volume, and mute status) of the recording device.
+    /// </remarks>
     public class RecordingDeviceModel : IDisposable
     {
-        private MMDevice _device;
-        private bool _isRecording;
+        /// <summary>
+        /// Backing field for the <c cref="Volume">Volume</c> property
+        /// </summary>
         private float _volume;
-        private bool _mute;
-        private IWaveIn _capture;
-        private WasapiOut _output;
-        private WaveFormat _waveFormat;
-        private BufferedWaveProvider _buffer;
-        private BufferedWaveProvider _resamplerBuffer;
-        private MediaFoundationResampler _resampler;
-        private bool _isLoopback;
-        private string _error;
 
-        public MMDevice Device => _device;
-        public bool IsRecording => _isRecording;
+        /// <summary>
+        /// NAudio's capture object for the selected audio device
+        /// </summary>
+        private IWaveIn _capture;
+
+        /// <summary>
+        /// NAudio's output object for the selected audio device
+        /// </summary>
+        /// <remarks>
+        /// This is only used to play silence in the audio device if it is a loopback device
+        /// because wave data is not generated for a loopback device unless it is playing something
+        /// </remarks>
+        private WasapiOut _output;
+
+        /// <summary>
+        /// Internal Wave buffer where the recorded bytes are stored until they are read
+        /// </summary>
+        private BufferedWaveProvider _buffer;
+
+        /// <summary>
+        /// Internal Wave buffer used if we need to resample the audio
+        /// (i.e., if we are recording on a different sample rate than the audio device's native rate)
+        /// </summary>
+        private BufferedWaveProvider _resamplerBuffer;
+
+        /// <summary>
+        /// Media Foundation Resampleer used if we need to resample the audio
+        /// (i.e., if we are recording on a different sample rate than the audio device's native rate)
+        /// </summary>
+        private MediaFoundationResampler _resampler;
+
+        /// <summary>
+        /// Whether this is a loopback device or not
+        /// (i.e., if we are recording the sound that is being played on an output device)
+        /// </summary>
+        private bool _isLoopback;
+
+        /// <summary>
+        /// The Audio Device that is being used by this model
+        /// </summary>
+        public MMDevice Device { get; private set; }
+
+        /// <summary>
+        /// Whether recording is active or not
+        /// </summary>
+        public bool IsRecording { get; private set; }
+
+        /// <summary>
+        /// The current recording volume
+        /// </summary>
+        /// <remarks>
+        /// This value is capped at zero in the bottom end and 2.0 at the top end
+        /// </remarks>
         public float Volume
         {
-            get { return _volume;  }
-            set
-            {
-                _volume = value > 2 ? 2.0f : value < 0 ? 0.0f : value;
-            }
+            get => _volume;
+            set => _volume = value > 2 ? 2.0f : value < 0 ? 0.0f : value;
         }
-        public bool Mute
-        {
-            get { return _mute;  }
-            set
-            {
-                _mute = value;
-            }
-        }
-        public WaveFormat WaveFormat => _capture?.WaveFormat;
+
+        /// <summary>
+        /// The current mute state of the device
+        /// </summary>
+        /// <remarks>
+        /// If the device is mutted, all audio levels are set to zero when recording or displaying the levels
+        /// </remarks>
+        public bool Mute { get; set; }
+
+        /// <summary>
+        /// The wave format being used for the recording
+        /// </summary>
+        public WaveFormat WaveFormat { get; private set; }
+
+        /// <summary>
+        /// The number of bytes currently stored in the internal buffer and available to be read
+        /// </summary>
         public int BufferedBytes => _buffer != null ? _buffer.BufferedBytes : 0;
-        public string Error => _error;
 
+        /// <summary>
+        /// If an error occurs while recording, the error message is stored in this property
+        /// </summary>
+        public string Error { get; private set; }
+
+        /// <summary>
+        /// This event is invoked every time new sound data is available, even if recording is not active.
+        /// This allows the UI to display a sound level indicator.
+        /// </summary>
         public event EventHandler<LevelMeterEventArgs> LevelChanged;
-        //public event EventHandler<WaveInEventArgs> DataAvailable;
 
+        /// <summary>
+        /// Initializes an instance with the provided audio device and using its native wave format
+        /// </summary>
+        /// <param name="device">The audio device to use for recording</param>
         public RecordingDeviceModel(MMDevice device)
         {
             Initialize(device, null);
         }
 
+        /// <summary>
+        /// Initializes an instance with the provided audio device and wave format
+        /// </summary>
+        /// <param name="device">The audio device to use for recording</param>
+        /// <param name="waveFormat">The wave format to use for recording. Currently, this is only used for input devices and ignored for loopback devices.</param>
         public RecordingDeviceModel(MMDevice device, WaveFormat waveFormat)
         {
             Initialize(device, waveFormat);
         }
 
+        /// <summary>
+        /// Initializes an instance with the provided audio device and wave format
+        /// </summary>
+        /// <param name="device">The audio device to use for recording</param>
+        /// <param name="waveFormat">The wave format to use for recording. Currently, this is only used for input devices and ignored for loopback devices.</param>
         private void Initialize(MMDevice device, WaveFormat waveFormat)
         {
-            _device = device ?? throw new ArgumentNullException("device");
-            _waveFormat = waveFormat;
-            _isRecording = false;
-            _volume = _device.AudioEndpointVolume.MasterVolumeLevelScalar;
-            _mute = _device.AudioEndpointVolume.Mute;
-            _isLoopback = _device.DataFlow == DataFlow.Render;
+            // Initialize the internal properties
+            Device = device ?? throw new ArgumentNullException("device");
+            IsRecording = false;
+            Volume = Device.AudioEndpointVolume.MasterVolumeLevelScalar;
+            Mute = Device.AudioEndpointVolume.Mute;
+            WaveFormat = waveFormat;
+            _isLoopback = Device.DataFlow == DataFlow.Render;
+
             if (_isLoopback)
             {
-                _output = new WasapiOut(_device, AudioClientShareMode.Shared, true, 200);
+                // Initialize the output device we will use to play silence on the loopback device
+                _output = new WasapiOut(Device, AudioClientShareMode.Shared, true, 200);
                 _output.Init(new SilenceProvider(_output.OutputWaveFormat));
-                _capture = new WasapiLoopbackCapture(_device);
-                _waveFormat = _capture.WaveFormat;
+                // Initialize the capture device
+                _capture = new WasapiLoopbackCapture(Device);
+                // Set the recording wave format to the device's native format
+                WaveFormat = _capture.WaveFormat;
             }
             else
             {
-                _capture = new WasapiCapture(_device);
-                if (_waveFormat != null)
+                // Initialize the capture device
+                _capture = new WasapiCapture(Device);
+                if (WaveFormat != null)
                 {
-                    if (_device.AudioClient.IsFormatSupported(AudioClientShareMode.Shared, _waveFormat))
+                    if (Device.AudioClient.IsFormatSupported(AudioClientShareMode.Shared, WaveFormat))
                     {
-                        _capture.WaveFormat = _waveFormat;
-                    } 
+                        // Ask the capture device to record directly in the desired format
+                        _capture.WaveFormat = WaveFormat;
+                    }
                     else
                     {
                         // Unsupported Wave Format, so, we need to resample or convert channels
-                        if (_capture.WaveFormat.SampleRate != _waveFormat.SampleRate)
+                        if (_capture.WaveFormat.SampleRate != WaveFormat.SampleRate)
                         {
-                            _resamplerBuffer = new BufferedWaveProvider(_waveFormat)
+                            _resamplerBuffer = new BufferedWaveProvider(WaveFormat)
                             {
                                 ReadFully = false
                             };
-                            _resampler = new MediaFoundationResampler(_resamplerBuffer, _waveFormat);
+                            _resampler = new MediaFoundationResampler(_resamplerBuffer, WaveFormat);
                         }
                     }
                 }
                 else
                 {
-                    _waveFormat = _capture.WaveFormat;
+                    // Set the recording wave format to the device's native format
+                    WaveFormat = _capture.WaveFormat;
                 }
             }
-            _buffer = new BufferedWaveProvider(_waveFormat);
+            // Initialize the buffer and start audio capture.
+            // This will start invoking LevelChanged events immediatelly,
+            // but the data will only be saved to the buffer once IsRecording is set to true.
+            _buffer = new BufferedWaveProvider(WaveFormat);
             _capture.DataAvailable += OnDataAvailable;
             _output?.Play();
             _capture.StartRecording();
         }
 
+        /// <summary>
+        /// Starts recording and saving audio data to the internal buffer
+        /// </summary>
         public void StartRecording()
         {
-            _error = null;
-            _isRecording = true;
+            Error = null;
+            IsRecording = true;
         }
 
+        /// <summary>
+        /// Stops recording
+        /// </summary>
         public void StopRecording()
         {
-            _isRecording = false;
+            IsRecording = false;
         }
 
+        /// <summary>
+        /// Reads the desired number of bytes from the internal buffer
+        /// </summary>
+        /// <param name="buffer">The destination buffer to copy the bytes to</param>
+        /// <param name="offset">The starting position to read from the internal buffer</param>
+        /// <param name="count">The max number of bytes to read</param>
+        /// <returns>The actual number of bytes read</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
             return _buffer != null ? _buffer.Read(buffer, offset, count) : 0;
         }
 
+        /// <summary>
+        /// Disposes all the audio devices and the resampler to free resources
+        /// </summary>
+        /// <remarks>
+        /// Before disposing the audio devices, recording is stopped if it is currently active
+        /// </remarks>
         public void Dispose()
         {
             StopRecording();
@@ -129,31 +236,50 @@ namespace SoundBitsRecorder
             _resampler?.Dispose();
         }
 
+        /// <summary>
+        /// Handler for DataAvailable events from the capture device
+        /// (i.e., this event is invoked each time new audio data is captured)
+        /// </summary>
+        /// <remarks>
+        /// This implementation always invokes a <c cref="LevelChanged">LevelChanged</c> event with the current audio level.
+        /// If recording is active, it also adds the recorded bytes to the internal buffer.
+        /// </remarks>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         private void OnDataAvailable(object sender, WaveInEventArgs args)
         {
             try
             {
+                // Invoke the LevelChanged event
                 float level = CalculateLevelMeter(args, _capture.WaveFormat);
                 LevelChanged?.Invoke(sender, new LevelMeterEventArgs(level));
-                if (_isRecording)
+
+                // Save the recorded bytes if recording is active
+                if (IsRecording)
                 {
                     WaveInEventArgs updatedArgs;
-                    if (_capture.WaveFormat.Channels == 1 && _waveFormat.Channels == 2)
+                    
+                    // Converts the number of channels from the input into the desired number of channels, if necessary
+                    if (_capture.WaveFormat.Channels == 1 && WaveFormat.Channels == 2)
                     {
                         updatedArgs = ConvertMonoToStereo(args);
-                    } else if (_capture.WaveFormat.Channels == 2 && _waveFormat.Channels == 1)
+                    }
+                    else if (_capture.WaveFormat.Channels == 2 && WaveFormat.Channels == 1)
                     {
                         updatedArgs = ConvertStereoToMono(args);
-                    } else
+                    }
+                    else
                     {
                         updatedArgs = args;
                     }
+
+                    // Resample the audio if necessary, and add the recorded bytes to the internal buffer
                     if (_resampler != null)
                     {
                         _resamplerBuffer.AddSamples(updatedArgs.Buffer, 0, updatedArgs.BytesRecorded);
-                        byte[] tempBuffer = new byte[_waveFormat.AverageBytesPerSecond + _waveFormat.BlockAlign];
+                        byte[] tempBuffer = new byte[WaveFormat.AverageBytesPerSecond + WaveFormat.BlockAlign];
                         int bytesWritten;
-                        while ((bytesWritten = _resampler.Read(tempBuffer, 0, _waveFormat.AverageBytesPerSecond)) > 0)
+                        while ((bytesWritten = _resampler.Read(tempBuffer, 0, WaveFormat.AverageBytesPerSecond)) > 0)
                         {
                             _buffer.AddSamples(AdjustVolume(tempBuffer, bytesWritten), 0, bytesWritten);
                         }
@@ -162,23 +288,32 @@ namespace SoundBitsRecorder
                     {
                         _buffer.AddSamples(AdjustVolume(updatedArgs.Buffer, updatedArgs.BytesRecorded), 0, updatedArgs.BytesRecorded);
                     }
-                    //DataAvailable?.Invoke(sender, args);
                 }
             }
             catch (Exception e)
             {
                 StopRecording();
                 Console.WriteLine(e);
-                _error = e.Message;
+                Error = e.Message;
             }
         }
 
+        /// <summary>
+        /// Calculates the current audio level coming from the audio device
+        /// </summary>
+        /// <param name="args">The data captured by the audio device</param>
+        /// <param name="waveFormat">The wave format of the data (note that this is the format being used by the audio device, not the final desired wave format)</param>
+        /// <returns>The highest audio level in the sample, adjusted according to the current volume</returns>
         private float CalculateLevelMeter(WaveInEventArgs args, WaveFormat waveFormat)
         {
-            if (_mute || _volume <= 0)
+            // Just return zero if the device is mutted or the volume is zero
+            if (Mute || Volume <= 0)
             {
                 return 0.0f;
             }
+
+            // Find the highest audio level in the captured bytes
+            // If the bytes are being captured in 8 bps or 16 bps (integer), convert the value to float (32 bps)
             float max = 0.0f;
             WaveBuffer buffer = new WaveBuffer(args.Buffer);
             switch (waveFormat.BitsPerSample)
@@ -212,16 +347,23 @@ namespace SoundBitsRecorder
                 default:
                     break;
             }
-            return max * _volume;
+
+            // Return the highest audio level in the sample adjusted according to the volume
+            return max * Volume;
         }
 
+        /// <summary>
+        /// Converts a Mono (1 channel) audio sample to Stereo (2 channels) by just copying the Mono audio data to both channels
+        /// </summary>
+        /// <param name="args">The Mono audio data captured by the audio device</param>
+        /// <returns>Stero audio data in the same format as the parameter</returns>
         private WaveInEventArgs ConvertMonoToStereo(WaveInEventArgs args)
         {
             byte[] outBuffer = new byte[args.BytesRecorded * 2];
             WaveBuffer waveBuffer = new WaveBuffer(args.Buffer);
             WaveBuffer outWaveBuffer = new WaveBuffer(outBuffer);
             int outIndex = 0;
-            switch (_waveFormat.BitsPerSample)
+            switch (WaveFormat.BitsPerSample)
             {
                 case 8:
                     for (int n = 0; n < args.BytesRecorded; n++)
@@ -245,18 +387,23 @@ namespace SoundBitsRecorder
                     }
                     break;
                 default:
-                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_waveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {WaveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
             }
             return new WaveInEventArgs(outBuffer, args.BytesRecorded * 2);
         }
 
+        /// <summary>
+        /// Converts a Stereo (2 channels) audio sample to Mono (1 channel) by just averaging the values from the 2 channels
+        /// </summary>
+        /// <param name="args">The Stereo audio data captured by the audio device</param>
+        /// <returns>Mono audio data in the same format as the parameter</returns>
         private WaveInEventArgs ConvertStereoToMono(WaveInEventArgs args)
         {
             byte[] outBuffer = new byte[args.BytesRecorded / 2];
             WaveBuffer waveBuffer = new WaveBuffer(args.Buffer);
             WaveBuffer outWaveBuffer = new WaveBuffer(outBuffer);
             int outIndex = 0;
-            switch (_waveFormat.BitsPerSample)
+            switch (WaveFormat.BitsPerSample)
             {
                 case 8:
                     for (int n = 0; n < args.BytesRecorded; n += 2)
@@ -283,58 +430,81 @@ namespace SoundBitsRecorder
                     }
                     break;
                 default:
-                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_waveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {WaveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
             }
             return new WaveInEventArgs(outBuffer, args.BytesRecorded / 2);
         }
 
+        /// <summary>
+        /// Adjusts the volume of audio data in the buffer according to the current value of the <c cref="Volume">Volume</c> property
+        /// </summary>
+        /// <param name="buffer">Buffer with audio data</param>
+        /// <param name="count">Number of bytes in the buffer</param>
+        /// <returns>A buffer with the same audio data with the volume adjusted. This can be the same buffer object received as the parameter or a new one.</returns>
         private byte[] AdjustVolume(byte[] buffer, int count)
         {
-            if (_volume == 1.0f)
+            // If the volume is 1.0, no adjustment is necessary, so, we just return the same buffer
+            if (Volume == 1.0f)
             {
                 return buffer;
             }
+
+            // If the volume is 0, then we just return a buffer with all zeroes
             byte[] outBuffer = new byte[count];
-            if (_mute || _volume <= 0)
+            if (Mute || Volume <= 0)
             {
                 return outBuffer;
             }
+
+            // Multiply each value in the buffer by the Volume
             WaveBuffer waveBuffer = new WaveBuffer(buffer);
             WaveBuffer outWaveBuffer = new WaveBuffer(outBuffer);
-            switch (_waveFormat.BitsPerSample)
+            switch (WaveFormat.BitsPerSample)
             {
                 case 8:
                     for (int i = 0; i < count; i++)
                     {
-                        outBuffer[i] += (byte) (buffer[i] * _volume);
+                        outBuffer[i] += (byte) (buffer[i] * Volume);
                     }
                     break;
                 case 16:
                     for (int i = 0; i < count / 2; i++)
                     {
-                        outWaveBuffer.ShortBuffer[i] += (short) (waveBuffer.ShortBuffer[i] * _volume);
+                        outWaveBuffer.ShortBuffer[i] += (short) (waveBuffer.ShortBuffer[i] * Volume);
                     }
                     break;
                 case 32:
                     for (int i = 0; i < count / 4; i++)
                     {
-                        outWaveBuffer.FloatBuffer[i] += waveBuffer.FloatBuffer[i] * _volume;
+                        outWaveBuffer.FloatBuffer[i] += waveBuffer.FloatBuffer[i] * Volume;
                     }
                     break;
                 default:
-                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_waveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
+                    throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {WaveFormat.BitsPerSample} " + Properties.Resources.BitsPerSample);
             }
+
+            // Return the buffer with the adjusted data
             return outBuffer;
         }
     }
 
+    /// <summary>
+    /// Data for <c>LevelChanged</c> events
+    /// </summary>
     public class LevelMeterEventArgs
     {
+        /// <summary>
+        /// Initializes the data with the given level value
+        /// </summary>
+        /// <param name="level">The highest audio level for a sample (32-bit float format)</param>
         public LevelMeterEventArgs(float level)
         {
             Level = level;
         }
 
+        /// <summary>
+        /// The highest audio level for a sample (32-bit float format)
+        /// </summary>
         public float Level { get; }
     }
 }
