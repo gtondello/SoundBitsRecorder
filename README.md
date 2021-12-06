@@ -9,7 +9,7 @@ Source code: [https://github.com/gtondello/SoundBitsRecorder](https://github.com
 
 Copyright 2021 Gustavo Fortes Tondello
 
-Licensed under the Apache License, Version 2.0. See [LICENSE.txt](LICENSE.txt) for details.
+Licensed under the Apache License, Version 2.0. See [SoundBitsRecorder/LICENSE.txt](SoundBitsRecorder/LICENSE.txt) for details.
 
 
 ## Description
