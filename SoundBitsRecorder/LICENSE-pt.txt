@@ -2,21 +2,36 @@
 ------------------
 Autor: Gustavo Fortes Tondello
 Empresa: GamefulBits
-Website: https://gamefulbits.com/
+Website: https://gamefulbits.com/SoundBitsRecorder
+Código fonte: https://github.com/gtondello/SoundBitsRecorder
 
-Copyright (c) 2021 Gustavo Fortes Tondello
+Copyright 2021 Gustavo Fortes Tondello
+
 
 Licença:
 --------
-Uma autorização é aqui fornecida, sem custo, para qualquer pessoa que obter uma cópia deste programa, para utilizá-lo para objetivos não comerciais somente (por exemplo, usos pessoais, educacionais ou sem fins de lucro).
 
-Se você necessitar utilizar este programa para objetivos comerciais, você precisa adquirir uma licença profissional. Por favor, verifique gamefulbits.com para opções.
+Licenciado sob a Licença Apache, Versão 2.0 (a "Licença"); você não pode usar este software exceto em conformidade com esta Licença.
 
-Este programa é fornecido "no estado em que se encontra", sem garantia de qualquer tipo, expressa ou implícita, incluindo, mas não se limitando às garantias de comercialização, adequação a um propósito específico e não violação. Em nenhum caso os autores ou detentores de direitos autorais serão responsáveis por qualquer reclamação, danos ou outra responsabilidade, seja em uma ação de contrato, ato ilícito ou de outra forma, decorrente de, por causa de, ou em conexão com o programa, seu uso, ou outras negociações relativas ao programa.
+Você pode obter uma cópia da Licença em http://www.apache.org/licenses/LICENSE-2.0
+
+A menos que exigido pela lei aplicável ou acordado por escrito, o software distribuído sob a Licença é distribuído "COMO ESTÁ", SEM GARANTIAS OU CONDIÇÕES DE QUALQUER TIPO, expressas ou implícitas. Consulte a Licença para as permissões e limitações que regem o texto específico sob a Licença.
+
+
+Licença (original em inglês):
+--------
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this software except in compliance with the License.
+
+You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
 
 Licenças de terceiros:
 ---------------------
-O único do gravador de som foi criado por Kiranshastry em www.flaticon.com.
+
+O ícone do gravador de som foi criado por Kiranshastry em www.flaticon.com.
 
 A seguinte biblioteca é usada sob a Microsoft Software License:
 - Windows API Code Pack for Microsoft .NET Framework (https://github.com/contre/Windows-API-Code-Pack-1.1)
@@ -28,6 +43,7 @@ As seguintes bibliotecas são usadas sob uma licença MIT:
 - NAudio (https://github.com/naudio/NAudio) - Copyright 2020 Mark Heath
 - NAUdio.Lame (https://github.com/Corey-M/NAudio.Lame) - Copyright 2013-2019 Corey Murtagh
 - AutoUpdater.NET (https://github.com/ravibpatel/AutoUpdater.NET) - Copyright 2012-2020 RBSoft
+
 
 A licença MIT:
 ----------------

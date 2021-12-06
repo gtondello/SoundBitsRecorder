@@ -49,5 +49,6 @@
         <Label x:Name="label2" Content="{x:Static p:Resources.OutputDevice}" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" Height="26" Width="148" Grid.ColumnSpan="2"/>
         <ComboBox x:Name="comboBoxOutput" Margin="68,206,10,0" VerticalAlignment="Top" Grid.Column="1" Height="22"/>
         <StackPanel x:Name="panelOutputDevice" Height="86" Margin="10,233,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Separator Height="10" Margin="10,324,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
     </Grid>
 </Window>

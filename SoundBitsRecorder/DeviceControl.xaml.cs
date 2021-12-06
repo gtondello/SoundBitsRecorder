@@ -7,39 +7,73 @@ using System.Windows.Media.Imaging;
 
 namespace SoundBitsRecorder
 {
-
     /// <summary>
     /// Interaction logic for DeviceControl.xaml
     /// </summary>
+    /// <remarks>
+    /// This is a UI control that displays the current status of a recording device (selected audio device, audio level, volume, mute status)
+    /// and let's user modify it (change audio device, adjust the volume, mute/unmute the device).
+    /// </remarks>
     public partial class DeviceControl : UserControl
     {
+        /// <summary>
+        /// Unmute icon
+        /// </summary>
         private static readonly BitmapImage _unmuteImage = new BitmapImage(new Uri(@"/SoundBitsRecorder;component/unmute.png", UriKind.Relative));
+
+        /// <summary>
+        /// Mute icon
+        /// </summary>
         private static readonly BitmapImage _muteImage = new BitmapImage(new Uri(@"/SoundBitsRecorder;component/mute.png", UriKind.Relative));
 
-        private RecordingDeviceModel _model;
+        /// <summary>
+        /// Whether the UI controls are initialized
+        /// </summary>
+        private readonly bool _initialized;
+
+        /// <summary>
+        /// The latest audio level captured by the audio device, which is displayed in the UI
+        /// </summary>
         private float _level;
-        private bool _initialized;
+
+        /// <summary>
+        /// Timer used to update the level display periodically
+        /// </summary>
         private Timer _timer;
 
-        public RecordingDeviceModel Model => _model;
+        /// <summary>
+        /// The <c cref="RecordingDeviceModel">RecordingDeviceModel</c> instance that is being controlled
+        /// </summary>
+        public RecordingDeviceModel Model { get; private set; }
 
+        /// <summary>
+        /// Initializes this control with the specified recording model and the initial volume and mute status
+        /// </summary>
+        /// <param name="model">The <c cref="RecordingDeviceModel">RecordingDeviceModel</c> instance that will be controlled</param>
+        /// <param name="startingVolume">The starting volume of the recording model</param>
+        /// <param name="startingMuted">The starting mute status of the recording model</param>
         public DeviceControl(RecordingDeviceModel model, float startingVolume = 1.0f, bool startingMuted = false)
         {
-            _model = model;
-            _model.Volume = startingVolume;
-            _model.Mute = startingMuted;
+            Model = model;
+            Model.Volume = startingVolume;
+            Model.Mute = startingMuted;
+
+            /// Initialize the UI components
             _initialized = false;
             InitializeComponent();
-            label.Content = _model.Device.FriendlyName;
-            volumeControl.Value = _model.Volume * 100.0;
+            label.Content = Model.Device.FriendlyName;
+            volumeControl.Value = Model.Volume * 100.0;
             UpdateVolumeLabel();
             UpdateMuteImage();
             _initialized = true;
-            _model.LevelChanged += (sender, args) =>
+
+            // Add the LevelChanged event handler to the model, which will update the _level property
+            Model.LevelChanged += (sender, args) =>
             {
                 _level = args.Level;
             };
 
+            // Initialize the timer, which will update the progress bar each 50 milliseconds with the current value of _level
             _timer = new Timer(50);
             _timer.Elapsed += (s, e) =>
             {
@@ -52,14 +86,22 @@ namespace SoundBitsRecorder
             _timer.Enabled = true;
         }
 
+        /// <summary>
+        /// Stops and disposes the Timer (stops updating the UI with the audio levels)
+        /// </summary>
         public void Clear()
         {
             _timer?.Stop();
             _timer?.Dispose();
             _timer = null;
-            _model = null;
+            Model = null;
         }
 
+        /// <summary>
+        /// Calculates a decibel (db) value from a 32-bit float audio value
+        /// </summary>
+        /// <param name="level">An audio value in the 32-bit float format</param>
+        /// <returns>The db value corresponding to the audio level. This value will be between 0 and 60</returns>
         private float CalculateDb(float level)
         {
             float dbVariation = (float) (20 * Math.Log10(1.0 / level));
@@ -69,22 +111,45 @@ namespace SoundBitsRecorder
             return db;
         }
 
+        /// <summary>
+        /// Handler for the Volume control change
+        /// </summary>
+        /// <remarks>
+        /// Updates the Volume in the Model, unmutes it, and updates the UI
+        /// </remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void volumeControl_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
         {
             if (!_initialized) return;
-            _model.Volume = (float) (volumeControl.Value / 100.0);
-            _model.Mute = false;
+            Model.Volume = (float) (volumeControl.Value / 100.0);
+            Model.Mute = false;
             UpdateVolumeLabel();
             UpdateMuteImage();
         }
 
+        /// <summary>
+        /// Handler for the Mute/Unmute control
+        /// </summary>
+        /// <remarks>
+        /// Toggles the mute satus of the Model and updates the UI
+        /// </remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MuteButton_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            _model.Mute = !_model.Mute;
+            Model.Mute = !Model.Mute;
             UpdateVolumeLabel();
             UpdateMuteImage();
         }
 
+        /// <summary>
+        /// Helper method to update the text block that displays the volume
+        /// </summary>
+        /// <remarks>
+        /// The current volume is displayed as a percentage. If the value is above 100%, then it is displayed in red.
+        /// If the Model is mutted, then the volume value is displayed with a strikethrough decoration.
+        /// </remarks>
         private void UpdateVolumeLabel()
         {
             if (volumeLabel != null)
@@ -92,18 +157,21 @@ namespace SoundBitsRecorder
                 int volume = (int)volumeControl.Value;
                 volumeLabel.Text = volume + "%";
                 volumeLabel.Foreground = new SolidColorBrush(volume > 100 ? Color.FromRgb(255, 0, 0) : Color.FromRgb(0, 0, 0));
-                volumeLabel.TextDecorations = _model.Mute ? TextDecorations.Strikethrough : null;
+                volumeLabel.TextDecorations = Model.Mute ? TextDecorations.Strikethrough : null;
             }
         }
 
+        /// <summary>
+        /// Helper method to updates the image and the tooltip of the Mute/Unmute button according to the model state
+        /// </summary>
         private void UpdateMuteImage()
         {
             if (muteButton != null)
             {
-                muteButton.Source = _model.Mute ? _muteImage : _unmuteImage;
+                muteButton.Source = Model.Mute ? _muteImage : _unmuteImage;
                 ToolTip tooltip = new ToolTip
                 {
-                    Content = _model.Mute ? "Unmute" : "Mute"
+                    Content = Model.Mute ? "Unmute" : "Mute"
                 };
                 ToolTipService.SetToolTip(muteButton, tooltip);
             }

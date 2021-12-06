@@ -1,4 +1,10 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Update this file for each build to configure the automatic update function.
+The version property must correspond to the Assembly version of the build that should be downloaded.
+The url property must point to a valid source to download the installer for that version.
+After updated, this file must be uploaded to the location passed to the AutoUpdater.Start call in the RecordingWindow's constructor.
+-->
 <item>
   <version>1.1.0.0</version>
   <url>http://apps.gamefulbits.com/downloads/SoundBitsRecorder.msi</url>
