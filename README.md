@@ -1,5 +1,7 @@
 # SoundBits Recorder
 
+[![GitHub](https://img.shields.io/github/license/gtondello/SoundBitsRecorder)](SoundBitsRecorder/LICENSE.txt)
+
 ![GamefulBits](SoundBitsRecorder/GamefulBitsLogo.png)
 
 Author: Gustavo Fortes Tondello  
@@ -8,8 +10,6 @@ Website: [https://gamefulbits.com/SoundBitsRecorder](https://gamefulbits.com/Sou
 Source code: [https://github.com/gtondello/SoundBitsRecorder](https://github.com/gtondello/SoundBitsRecorder)
 
 Copyright 2021 Gustavo Fortes Tondello
-
-Licensed under the Apache License, Version 2.0. See [SoundBitsRecorder/LICENSE.txt](SoundBitsRecorder/LICENSE.txt) for details.
 
 
 ## Description
