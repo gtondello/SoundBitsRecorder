@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="SoundBitsRecorder.DeviceControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SoundBitsRecorder"
+             mc:Ignorable="d" 
+             d:DesignHeight="100" d:DesignWidth="480">
+    <UserControl.Resources>
+        <Style TargetType="{x:Type Button}" x:Key="ImageButtonStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <ContentPresenter/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Margin="0,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Label x:Name="label" Content=""></Label>
+        <ProgressBar x:Name="progressBar" Height="15" VerticalAlignment="Top" Margin="0,0,0,0" Grid.Row="1" Grid.ColumnSpan="3" Maximum="60" RenderTransformOrigin="0.5,0.5">
+            <ProgressBar.Background>
+                <LinearGradientBrush StartPoint="0,0.5" EndPoint="1,0.5">
+                    <LinearGradientBrush.GradientStops>
+                        <GradientStop Color="Red" Offset="0"/>
+                        <GradientStop Color="Red" Offset="0.14"/>
+                        <GradientStop Color="Yellow" Offset="0.16"/>
+                        <GradientStop Color="Yellow" Offset="0.31"/>
+                        <GradientStop Color="Lime" Offset="0.34"/>
+                        <GradientStop Color="Lime" Offset="1"/>
+                    </LinearGradientBrush.GradientStops>
+                </LinearGradientBrush>
+            </ProgressBar.Background>
+            <ProgressBar.Foreground>
+                <SolidColorBrush Color="LightGray"/>
+            </ProgressBar.Foreground>
+            <ProgressBar.RenderTransform>
+                <RotateTransform Angle="180"/>
+            </ProgressBar.RenderTransform>
+        </ProgressBar>
+        <Slider x:Name="volumeControl" Margin="0,0,0,0" Grid.Row="2" Maximum="150" Value="100" TickPlacement="BottomRight" TickFrequency="100" ValueChanged="volumeControl_ValueChanged" />
+        <TextBlock x:Name="volumeLabel" Width="40" Grid.Row="2" Grid.Column="1">100%</TextBlock>
+        <Button Style="{StaticResource ImageButtonStyle}" Click="MuteButton_Click" Height="16" Width="16" Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Left">
+            <Image x:Name="muteButton"  Source="mute.png" />
+        </Button>
+    </Grid>
+</UserControl>

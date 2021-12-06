@@ -120,8 +120,14 @@
   <data name="About" xml:space="preserve">
     <value>Sobre SoundBits Recorder</value>
   </data>
+  <data name="Advanced" xml:space="preserve">
+    <value>Avançado</value>
+  </data>
   <data name="Author" xml:space="preserve">
     <value>Autor:</value>
+  </data>
+  <data name="Basic" xml:space="preserve">
+    <value>Básico</value>
   </data>
   <data name="BitsPerSample" xml:space="preserve">
     <value>bits por amostra</value>
@@ -157,6 +163,9 @@
   <data name="ErrorAlreadyStarted" xml:space="preserve">
     <value>A gravação já foi iniciada.</value>
   </data>
+  <data name="ErrorChangeWhileRecording" xml:space="preserve">
+    <value>Não é possível adicionar ou remover dispositivos enquanto gravando.</value>
+  </data>
   <data name="ErrorNoDevices" xml:space="preserve">
     <value>Pelo menos um dispositivo de entrada ou saída precisa ser selectionado.</value>
   </data>
@@ -171,6 +180,9 @@
   </data>
   <data name="Initializing" xml:space="preserve">
     <value>Inicializando...</value>
+  </data>
+  <data name="InputDevice" xml:space="preserve">
+    <value>Disp. Entrada para Gravar:</value>
   </data>
   <data name="Licenses" xml:space="preserve">
     <value>Licenças</value>
@@ -201,6 +213,9 @@
   </data>
   <data name="OpenFolder" xml:space="preserve">
     <value>Abrir Pasta...</value>
+  </data>
+  <data name="OutputDevice" xml:space="preserve">
+    <value>Disp. Saída para Gravar:</value>
   </data>
   <data name="RecordFromInput" xml:space="preserve">
     <value>Gravar som da entrada</value>

@@ -70,11 +70,29 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Advanced.
+        /// </summary>
+        public static string Advanced {
+            get {
+                return ResourceManager.GetString("Advanced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Author:.
         /// </summary>
         public static string Author {
             get {
                 return ResourceManager.GetString("Author", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Basic.
+        /// </summary>
+        public static string Basic {
+            get {
+                return ResourceManager.GetString("Basic", resourceCulture);
             }
         }
         
@@ -88,7 +106,7 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 2021-05-30 20:32:01.54 
+        ///   Looks up a localized string similar to 2021-06-27 
         ///.
         /// </summary>
         public static string BuildDate {
@@ -179,6 +197,15 @@ namespace SoundBitsRecorder.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot add or remove devices while recording..
+        /// </summary>
+        public static string ErrorChangeWhileRecording {
+            get {
+                return ResourceManager.GetString("ErrorChangeWhileRecording", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to At least an input or loopback device must be specified..
         /// </summary>
         public static string ErrorNoDevices {
@@ -220,6 +247,15 @@ namespace SoundBitsRecorder.Properties {
         public static string Initializing {
             get {
                 return ResourceManager.GetString("Initializing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Input Device to Record:.
+        /// </summary>
+        public static string InputDevice {
+            get {
+                return ResourceManager.GetString("InputDevice", resourceCulture);
             }
         }
         
@@ -310,6 +346,15 @@ namespace SoundBitsRecorder.Properties {
         public static string OpenFolder {
             get {
                 return ResourceManager.GetString("OpenFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Output Device to Record:.
+        /// </summary>
+        public static string OutputDevice {
+            get {
+                return ResourceManager.GetString("OutputDevice", resourceCulture);
             }
         }
         

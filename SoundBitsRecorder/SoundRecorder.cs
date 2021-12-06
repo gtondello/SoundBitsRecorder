@@ -94,7 +94,30 @@ namespace SoundBitsRecorder
                 {
                     throw new FormatException(Properties.Resources.UnsupportedSoundEncoding + $": {_format.BitsPerSample} " + Properties.Resources.BitsPerSample);
                 }
+            }
+            catch (Exception e)
+            {
+                StopRecording();
+                _error = e.Message;
+                throw e;
+            }
 
+            StartRecording(outputDirectory);
+        }
+
+        public void StartRecording(string outputDirectory)
+        {
+            if (_isRecording)
+            {
+                throw new ApplicationException(Properties.Resources.ErrorAlreadyStarted);
+            }
+            if (_recordingModels.Count == 0)
+            {
+                throw new ArgumentException(Properties.Resources.ErrorNoDevices);
+            }
+
+            try
+            {
                 string fileName = Path.Combine(outputDirectory, DateTime.Now.ToString("yyyyMMddHHmmss") + ".mp3");
                 _writer = new LameMP3FileWriter(fileName, _format, 160);
 
@@ -133,7 +156,6 @@ namespace SoundBitsRecorder
                 foreach (RecordingDeviceModel recordingModel in _recordingModels)
                 {
                     recordingModel.StopRecording();
-                    recordingModel.Dispose();
                 }
 
                 if (_writer != null)
@@ -144,11 +166,67 @@ namespace SoundBitsRecorder
             }
             finally
             {
-                _recordingModels.Clear();
                 _timer = null;
-                _format = null;
                 _error = null;
                 _writer = null;
+            }
+        }
+
+        public RecordingDeviceModel AddDevice(MMDevice device)
+        {
+            return AddDevice(device, null);
+        }
+
+        public RecordingDeviceModel AddDevice(MMDevice device, WaveFormat format)
+        {
+            if (_isRecording)
+            {
+                throw new ApplicationException(Properties.Resources.ErrorChangeWhileRecording);
+            }
+            RecordingDeviceModel recordingModel = new RecordingDeviceModel(device, format);
+            _recordingModels.Add(recordingModel);
+            if (_format == null)
+            {
+                _format = recordingModel.WaveFormat;
+            }
+            return recordingModel;
+        }
+
+        public void RemoveDevice(RecordingDeviceModel recordingModel)
+        {
+            if (_isRecording)
+            {
+                throw new ApplicationException(Properties.Resources.ErrorChangeWhileRecording);
+            }
+            try
+            {
+                recordingModel.StopRecording();
+                recordingModel.Dispose();
+            }
+            finally
+            {
+                _recordingModels.Remove(recordingModel);
+            }
+        }
+
+        public void RemoveAllDevices()
+        {
+            if (_isRecording)
+            {
+                throw new ApplicationException(Properties.Resources.ErrorChangeWhileRecording);
+            }
+            try
+            {
+                foreach (RecordingDeviceModel recordingModel in _recordingModels)
+                {
+                    recordingModel.StopRecording();
+                    recordingModel.Dispose();
+                }
+            }
+            finally
+            {
+                _recordingModels.Clear();
+                _format = null;
             }
         }
 

@@ -1,0 +1,53 @@
+﻿<Window x:Class="SoundBitsRecorder.RecordingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SoundBitsRecorder"
+        xmlns:p="clr-namespace:SoundBitsRecorder.Properties"
+        mc:Ignorable="d"
+        Title="SoundBits Recorder" Height="500" Width="500" ResizeMode="NoResize" Closing="RecordingWindow_Closing" Closed="Window_Closed" Icon="microphone.png" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="21*"/>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="labelTitle" Content="SoundBits Recorder" HorizontalAlignment="Left" Margin="35,35,0,0" VerticalAlignment="Top" FontSize="20" FontWeight="Bold" Grid.ColumnSpan="2" Height="37" Width="195"/>
+        <Label x:Name="label3" Content="{x:Static p:Resources.SaveTo}" HorizontalAlignment="Left" Margin="10,347,0,0" VerticalAlignment="Top" Height="26" Width="80"/>
+        <TextBox x:Name="textBoxFilename" Height="23" Margin="0,351,33,0" TextWrapping="NoWrap" Text="C:\tmp" VerticalAlignment="Top" Grid.Column="1"/>
+        <Button x:Name="buttonRecord" Content="{x:Static p:Resources.Initializing}" Margin="276,421,10,10" IsEnabled="False" Click="buttonRecord_Click" Grid.Column="1"/>
+        <Label x:Name="labelTime" Content="00:00" HorizontalAlignment="Left" Margin="10,430,0,0" VerticalAlignment="Top" FontSize="16" Height="31" Width="48" Visibility="Hidden"/>
+        <Label x:Name="labelRecording" Content="{x:Static p:Resources.Recording}" HorizontalAlignment="Left" Margin="10,414,0,0" VerticalAlignment="Top" Height="26" Width="71" Visibility="Hidden"/>
+        <Button x:Name="buttonFilename" Content="..." Grid.Column="1" Margin="0,351,10,0" VerticalAlignment="Top" Height="23" Width="23" Click="buttonFilename_Click" HorizontalAlignment="Right"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="0,374,0,0" VerticalAlignment="Top" Grid.Column="1" Height="16" Width="71">
+            <Hyperlink Click="OpenFolder_Click">
+                <TextBlock x:Name="linkOpenFolder" Text="{x:Static p:Resources.OpenFolder}"/>
+            </Hyperlink>
+        </TextBlock>
+        <Image x:Name="image" Height="32" Width="32" Margin="10,40,0,0" VerticalAlignment="Top" Source="microphone.png" HorizontalAlignment="Left"/>
+        <Menu x:Name="menu" VerticalAlignment="Top" Grid.ColumnSpan="2" Height="18">
+            <MenuItem x:Name="menuItemFile" Header="{x:Static p:Resources.MenuFile}">
+                <MenuItem x:Name="menuItemRecord" Header="{x:Static p:Resources.MenuStartRecording}" Click="buttonRecord_Click"/>
+                <Separator/>
+                <MenuItem x:Name="menuItemExit" Header="{x:Static p:Resources.MenuExit}" Click="ExitMenuItem_Click"/>
+            </MenuItem>
+            <MenuItem x:Name="menuItemSettings" Header="{x:Static p:Resources.MenuSettings}">
+                <MenuItem x:Name="menuItemOutputFolder" Header="{x:Static p:Resources.MenuOutputFolder}" Click="buttonFilename_Click"/>
+                <Separator/>
+                <MenuItem x:Name="menuItemLanguage" Header="{x:Static p:Resources.MenuLanguage}">
+                    <MenuItem x:Name="menuItemEnglish" Header="_English" IsCheckable="True" IsChecked="True" Click="menuItemEnglish_Click"/>
+                    <MenuItem x:Name="menuItemPortugues" Header="_Português" IsCheckable="True" Click="menuItemPortugues_Click"/>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_?">
+                <MenuItem x:Name="menuItemAbout" Header="{x:Static p:Resources.MenuAbout}" Click="AboutMenuItem_Click"/>
+            </MenuItem>
+        </Menu>
+        <Label x:Name="label1" Content="{x:Static p:Resources.InputDevice}" HorizontalAlignment="Left" Margin="10,84,0,0" VerticalAlignment="Top" Height="26" Width="148" Grid.ColumnSpan="2"/>
+        <ComboBox x:Name="comboBoxInput" Margin="68,88,10,0" VerticalAlignment="Top" Grid.Column="1" Height="22" SelectionChanged="comboBox_SelectionChanged"/>
+        <StackPanel x:Name="panelInputDevice" Height="86" Margin="10,115,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+        <Label x:Name="label2" Content="{x:Static p:Resources.OutputDevice}" HorizontalAlignment="Left" Margin="10,202,0,0" VerticalAlignment="Top" Height="26" Width="148" Grid.ColumnSpan="2"/>
+        <ComboBox x:Name="comboBoxOutput" Margin="68,206,10,0" VerticalAlignment="Top" Grid.Column="1" Height="22"/>
+        <StackPanel x:Name="panelOutputDevice" Height="86" Margin="10,233,10,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+    </Grid>
+</Window>
