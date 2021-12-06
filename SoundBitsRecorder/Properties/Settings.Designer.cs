@@ -49,85 +49,73 @@ namespace SoundBitsRecorder.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Basic_RecordInput {
+        [global::System.Configuration.DefaultSettingValueAttribute("Default")]
+        public string InputID {
             get {
-                return ((bool)(this["Basic_RecordInput"]));
+                return ((string)(this["InputID"]));
             }
             set {
-                this["Basic_RecordInput"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool Basic_RecordOutput {
-            get {
-                return ((bool)(this["Basic_RecordOutput"]));
-            }
-            set {
-                this["Basic_RecordOutput"] = value;
+                this["InputID"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("Default")]
-        public string Basic_InputID {
+        public string OutputID {
             get {
-                return ((string)(this["Basic_InputID"]));
+                return ((string)(this["OutputID"]));
             }
             set {
-                this["Basic_InputID"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Default")]
-        public string Basic_OutputID {
-            get {
-                return ((string)(this["Basic_OutputID"]));
-            }
-            set {
-                this["Basic_OutputID"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Basic")]
-        public string Main {
-            get {
-                return ((string)(this["Main"]));
-            }
-            set {
-                this["Main"] = value;
+                this["OutputID"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public float Advanced_InputVolume {
+        public float InputVolume {
             get {
-                return ((float)(this["Advanced_InputVolume"]));
+                return ((float)(this["InputVolume"]));
             }
             set {
-                this["Advanced_InputVolume"] = value;
+                this["InputVolume"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public float Advanced_OutputVolume {
+        public float OutputVolume {
             get {
-                return ((float)(this["Advanced_OutputVolume"]));
+                return ((float)(this["OutputVolume"]));
             }
             set {
-                this["Advanced_OutputVolume"] = value;
+                this["OutputVolume"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool InputMute {
+            get {
+                return ((bool)(this["InputMute"]));
+            }
+            set {
+                this["InputMute"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OutputMute {
+            get {
+                return ((bool)(this["OutputMute"]));
+            }
+            set {
+                this["OutputMute"] = value;
             }
         }
     }

@@ -13,9 +13,9 @@ using System.Windows.Input;
 namespace SoundBitsRecorder
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for RecordingWindow.xaml
     /// </summary>
-    public partial class AdvancedWindow : Window
+    public partial class RecordingWindow : Window
     {
         SoundRecorder _recorder;
         System.Timers.Timer _timer;
@@ -23,7 +23,7 @@ namespace SoundBitsRecorder
         bool _isStopping;
         bool _initialized;
 
-        public AdvancedWindow()
+        public RecordingWindow()
         {
             System.Globalization.CultureInfo culture = new System.Globalization.CultureInfo(Properties.Settings.Default.Language);
             Thread.CurrentThread.CurrentUICulture = culture;
@@ -52,7 +52,7 @@ namespace SoundBitsRecorder
             foreach (MMDevice device in _recorder.CaptureDevices)
             {
                 comboBoxInput.Items.Add(device.FriendlyName);
-                if (device.ID == Properties.Settings.Default.Basic_InputID)
+                if (device.ID == Properties.Settings.Default.InputID)
                 {
                     comboBoxInput.SelectedIndex = comboBoxInput.Items.Count - 1;
                 }
@@ -63,7 +63,7 @@ namespace SoundBitsRecorder
             foreach (MMDevice device in _recorder.RenderDevices)
             {
                 comboBoxOutput.Items.Add(device.FriendlyName);
-                if (device.ID == Properties.Settings.Default.Basic_OutputID)
+                if (device.ID == Properties.Settings.Default.OutputID)
                 {
                     comboBoxOutput.SelectedIndex = comboBoxOutput.Items.Count - 1;
                 }
@@ -89,15 +89,19 @@ namespace SoundBitsRecorder
         {
             if (!_initialized) return;
 
-            float startInputVolume = Properties.Settings.Default.Advanced_InputVolume;
-            float startOutputVolume = Properties.Settings.Default.Advanced_OutputVolume;
+            float startInputVolume = Properties.Settings.Default.InputVolume;
+            float startOutputVolume = Properties.Settings.Default.OutputVolume;
+            bool startInputMute = Properties.Settings.Default.InputMute;
+            bool startOutputMute = Properties.Settings.Default.OutputMute;
             foreach (DeviceControl control in panelInputDevice.Children)
             {
                 startInputVolume = control.Model.Volume;
+                startInputMute = control.Model.Mute;
             }
             foreach (DeviceControl control in panelOutputDevice.Children)
             {
                 startOutputVolume = control.Model.Volume;
+                startOutputMute = control.Model.Mute;
             }
 
             RemoveAllDevices();
@@ -106,8 +110,8 @@ namespace SoundBitsRecorder
             int captureDeviceIndex = comboBoxInput.SelectedIndex - 1;
             RecordingDeviceModel renderModel = _recorder.AddDevice(renderDeviceIndex == -1 ? _recorder.DefaultRenderDevice : _recorder.RenderDevices[renderDeviceIndex]);
             RecordingDeviceModel captureModel = _recorder.AddDevice(captureDeviceIndex == -1 ? _recorder.DefaultCaptureDevice : _recorder.CaptureDevices[captureDeviceIndex], renderModel.WaveFormat);
-            panelOutputDevice.Children.Add(new DeviceControl(renderModel, startOutputVolume));
-            panelInputDevice.Children.Add(new DeviceControl(captureModel, startInputVolume));
+            panelOutputDevice.Children.Add(new DeviceControl(renderModel, startOutputVolume, startOutputMute));
+            panelInputDevice.Children.Add(new DeviceControl(captureModel, startInputVolume, startInputMute));
         }
 
         private void RemoveAllDevices()
@@ -125,7 +129,7 @@ namespace SoundBitsRecorder
             _recorder.RemoveAllDevices();
         }
 
-        private void AdvancedWindow_Closing(object sender, CancelEventArgs e)
+        private void RecordingWindow_Closing(object sender, CancelEventArgs e)
         {
             if (_isRecording)
             {
@@ -143,15 +147,17 @@ namespace SoundBitsRecorder
             if (!e.Cancel)
             {
                 Properties.Settings.Default.OutputFolder = textBoxFilename.Text.Trim();
-                Properties.Settings.Default.Basic_InputID = comboBoxInput.SelectedIndex == 0 ? "Default" : _recorder.CaptureDevices[comboBoxInput.SelectedIndex - 1].ID;
-                Properties.Settings.Default.Basic_OutputID = comboBoxOutput.SelectedIndex == 0 ? "Default" : _recorder.RenderDevices[comboBoxOutput.SelectedIndex - 1].ID;
+                Properties.Settings.Default.InputID = comboBoxInput.SelectedIndex == 0 ? "Default" : _recorder.CaptureDevices[comboBoxInput.SelectedIndex - 1].ID;
+                Properties.Settings.Default.OutputID = comboBoxOutput.SelectedIndex == 0 ? "Default" : _recorder.RenderDevices[comboBoxOutput.SelectedIndex - 1].ID;
                 foreach (DeviceControl control in panelInputDevice.Children)
                 {
-                    Properties.Settings.Default.Advanced_InputVolume = control.Model.Volume;
+                    Properties.Settings.Default.InputVolume = control.Model.Volume;
+                    Properties.Settings.Default.InputMute = control.Model.Mute;
                 }
                 foreach (DeviceControl control in panelOutputDevice.Children)
                 {
-                    Properties.Settings.Default.Advanced_OutputVolume = control.Model.Volume;
+                    Properties.Settings.Default.OutputVolume = control.Model.Volume;
+                    Properties.Settings.Default.OutputMute = control.Model.Mute;
                 }
                 Properties.Settings.Default.Save();
             }
@@ -300,19 +306,6 @@ namespace SoundBitsRecorder
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Close();
-        }
-
-        private void menuItemBasic_Click(object sender, RoutedEventArgs e)
-        {
-            Properties.Settings.Default.Main = "Basic";
-            MainWindow mainWindow = new MainWindow();
-            mainWindow.Show();
-            Close();
-        }
-
-        private void menuItemAdvanced_Click(object sender, RoutedEventArgs e)
-        {
-            menuItemAdvanced.IsChecked = true;
         }
 
         private void menuItemEnglish_Click(object sender, RoutedEventArgs e)
